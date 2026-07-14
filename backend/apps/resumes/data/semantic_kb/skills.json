@@ -1,0 +1,18 @@
+{
+  "category": "SKILL",
+  "entities": [
+    "Python", "JavaScript", "TypeScript", "Java", "C++", "C#", "Go", "Rust", "Ruby", "PHP",
+    "Swift", "Kotlin", "Scala", "R", "Dart", "MATLAB", "SQL", "HTML", "CSS", "Sass",
+    "React", "React Native", "Vue.js", "Angular", "Next.js", "Nuxt.js", "Node.js", "Express.js",
+    "Django", "Flask", "FastAPI", "Spring Boot", "ASP.NET", "Laravel", "Ruby on Rails",
+    "PostgreSQL", "MySQL", "MongoDB", "Redis", "Elasticsearch", "Cassandra", "DynamoDB", "SQLite",
+    "AWS", "Azure", "GCP", "Google Cloud Platform", "Docker", "Kubernetes", "Terraform", "Ansible",
+    "CI/CD", "Jenkins", "GitHub Actions", "GitLab CI", "Linux", "Bash", "Shell Scripting",
+    "TensorFlow", "PyTorch", "Scikit-Learn", "Keras", "OpenCV", "Pandas", "NumPy", "SciPy",
+    "Machine Learning", "Deep Learning", "Natural Language Processing", "Computer Vision", "LLMs",
+    "REST API", "GraphQL", "gRPC", "Microservices", "System Design", "Agile", "Scrum",
+    "Figma", "Photoshop", "Illustrator", "UI/UX Design", "Wireframing", "Prototyping",
+    "Excel", "Tableau", "Power BI", "SAP", "Salesforce", "Jira", "Confluence",
+    "Communication", "Leadership", "Problem Solving", "Project Management", "Teamwork"
+  ]
+}

@@ -1,0 +1,171 @@
+/* =============================================
+   Footer – Glassmorphism Style
+   ============================================= */
+
+.footer {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--glass-border);
+  padding: 80px 0 32px;
+  color: var(--subtext-color);
+  margin-top: auto;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+/* Brand Column */
+.footer-brand {
+  max-width: 320px;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-color);
+  margin-bottom: 16px;
+}
+
+.footer-logo-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--gradient-primary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #FFFFFF;
+}
+
+.footer-description {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: var(--subtext-color);
+  margin-bottom: 24px;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  color: var(--subtext-color);
+  font-size: 1.25rem;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+html.dark .footer-social-link {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.footer-social-link:hover {
+  background: var(--primary);
+  color: #FFFFFF;
+  transform: translateY(-2px);
+  border-color: transparent;
+  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* Link Columns */
+.footer-column-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin-bottom: 20px;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-link {
+  font-size: 0.9375rem;
+  color: var(--subtext-color);
+  transition: color var(--transition-fast);
+  text-decoration: none;
+}
+
+.footer-link:hover {
+  color: var(--primary);
+}
+
+/* Bottom Bar */
+.footer-bottom {
+  padding-top: 32px;
+  border-top: 1px solid var(--glass-border);
+}
+
+.footer-bottom-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-bottom span {
+  font-size: 0.875rem;
+  color: var(--subtext-color);
+  opacity: 0.8;
+}
+
+.footer-bottom-links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-bottom-link {
+  font-size: 0.875rem;
+  color: var(--subtext-color);
+  opacity: 0.8;
+  transition: color var(--transition-fast);
+  text-decoration: none;
+}
+
+.footer-bottom-link:hover {
+  color: var(--primary);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .footer-brand {
+    grid-column: 1 / -1;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .footer-bottom-inner {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+}

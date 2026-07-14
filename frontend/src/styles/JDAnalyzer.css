@@ -1,0 +1,612 @@
+/* =============================================
+   JD Analyzer Dashboard Styles — Phase 22
+   ============================================= */
+
+.jd-analyzer-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Header */
+.jd-header {
+  padding: 32px;
+}
+
+.jd-header-text h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.jd-header-text p {
+  font-size: 0.95rem;
+  color: var(--subtext-color);
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+/* Card base */
+.jd-card {
+  padding: 28px;
+}
+
+/* Section titles */
+.jd-section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Input Form */
+.jd-input-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.jd-textarea {
+  width: 100%;
+  min-height: 180px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--text-color);
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: all var(--transition-normal);
+}
+
+html.dark .jd-textarea {
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.jd-textarea:focus {
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+html.dark .jd-textarea:focus {
+  background: rgba(15, 23, 42, 0.55);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.jd-textarea::placeholder {
+  color: var(--subtext-color);
+  opacity: 0.7;
+}
+
+.jd-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.jd-analyze-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 14px;
+  border: none;
+  background: var(--gradient-primary);
+  color: white;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.15);
+}
+
+.jd-analyze-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.25);
+}
+
+.jd-analyze-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.jd-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: jd-spin 0.6s linear infinite;
+}
+
+@keyframes jd-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Score Cards Grid */
+.jd-scores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.jd-score-card {
+  padding: 20px;
+}
+
+.jd-score-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.jd-score-icon {
+  padding: 10px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jd-score-label {
+  font-size: 0.78rem;
+  color: var(--subtext-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.jd-score-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-family: var(--font-number);
+  margin-top: 2px;
+}
+
+.jd-score-bar-track {
+  width: 100%;
+  height: 5px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+html.dark .jd-score-bar-track {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.jd-score-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.8s ease;
+}
+
+/* Main Grid */
+.jd-main-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+  align-items: start;
+}
+
+.jd-main-grid > * {
+  min-width: 0;
+}
+
+.jd-right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Radar */
+.jd-radar-container {
+  width: 100%;
+}
+
+/* Verdict */
+.jd-verdict {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.02);
+  margin-top: 16px;
+}
+
+.jd-verdict-score {
+  font-size: 2rem;
+  font-weight: 800;
+  font-family: var(--font-number);
+}
+
+.jd-verdict-label {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.jd-verdict-sub {
+  font-size: 0.85rem;
+  color: var(--subtext-color);
+  margin-top: 2px;
+}
+
+/* Lists */
+.jd-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jd-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.88rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.02);
+}
+
+.jd-list-item svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.jd-list-success svg { color: var(--success); }
+.jd-list-danger svg { color: var(--danger); }
+
+.jd-empty-text {
+  color: var(--subtext-color);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+/* Skill Tags */
+.jd-skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.jd-tag {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.jd-tag-success {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.jd-tag-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.jd-tag-neutral {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-color);
+  border: 1px solid var(--glass-border);
+}
+
+/* Gap Grid */
+.jd-gap-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.jd-gap-grid > * { min-width: 0; }
+
+/* Suggestions */
+.jd-suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.jd-suggestion-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  gap: 12px;
+}
+
+.jd-suggestion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.jd-suggestion-action {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.jd-suggestion-detail {
+  font-size: 0.8rem;
+  color: var(--subtext-color);
+}
+
+.jd-suggestion-impact {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Bottom Grid */
+.jd-bottom-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.jd-bottom-grid > * { min-width: 0; }
+
+/* Interview */
+.jd-interview-score {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.jd-big-score {
+  font-size: 2.2rem;
+  font-weight: 800;
+  font-family: var(--font-number);
+}
+
+.jd-interview-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.jd-missing-areas h4 {
+  font-size: 0.85rem;
+  color: var(--subtext-color);
+  margin: 0 0 8px 0;
+}
+
+/* Learning */
+.jd-learning-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.jd-learning-item {
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.jd-learning-skill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.jd-learning-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.82rem;
+  color: var(--text-color);
+  padding-left: 22px;
+}
+
+.jd-learning-meta {
+  font-size: 0.75rem;
+  color: var(--subtext-color);
+}
+
+/* Salary */
+.jd-salary-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 0;
+}
+
+.jd-salary-range {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.jd-salary-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-family: var(--font-number);
+  color: var(--success);
+}
+
+.jd-salary-separator {
+  color: var(--subtext-color);
+  font-size: 1.2rem;
+}
+
+.jd-salary-label {
+  font-size: 0.82rem;
+  color: var(--subtext-color);
+}
+
+/* History */
+.jd-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jd-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.jd-history-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+
+.jd-history-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.jd-history-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jd-history-company {
+  font-size: 0.78rem;
+  color: var(--subtext-color);
+}
+
+.jd-history-scores {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.jd-history-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* ── Responsive ─────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .jd-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .jd-analyzer-page {
+    padding: 16px;
+    gap: 20px;
+  }
+
+  .jd-header {
+    padding: 20px;
+  }
+
+  .jd-header-text h1 {
+    font-size: 1.4rem;
+  }
+
+  .jd-card {
+    padding: 20px;
+  }
+
+  .jd-scores-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .jd-score-card {
+    padding: 16px;
+  }
+
+  .jd-score-value {
+    font-size: 1.15rem;
+  }
+
+  .jd-gap-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .jd-verdict {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (max-width: 580px) {
+  .jd-card {
+    padding: 16px;
+  }
+
+  .jd-suggestion-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .jd-history-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .jd-salary-value {
+    font-size: 1.2rem;
+  }
+
+  .jd-big-score {
+    font-size: 1.8rem;
+  }
+}

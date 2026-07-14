@@ -1,0 +1,330 @@
+/* =============================================
+   Job Intelligence Dashboard Styles
+   ============================================= */
+
+.job-dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Header styling */
+.job-dashboard-header {
+  padding: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.job-dashboard-header-text h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.job-dashboard-header-text p {
+  font-size: 0.95rem;
+  color: var(--subtext-color);
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+.job-dashboard-header-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-recalc {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-color);
+  transition: all var(--transition-normal);
+}
+
+.btn-recalc:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+  transform: translateY(-1px);
+}
+
+html.dark .btn-recalc:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Responsive Cards Padding */
+.job-card {
+  padding: 28px;
+}
+
+/* Metrics Grid */
+.job-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.metric-card-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.metric-card-icon-wrapper {
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metric-card-label {
+  font-size: 0.8rem;
+  color: var(--subtext-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metric-card-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 2px;
+  color: var(--text-color);
+  word-break: break-word;
+}
+
+/* Main Content Grid */
+.job-main-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.job-main-grid > div {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Table styling */
+.job-table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.job-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.job-table th {
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--subtext-color);
+  font-size: 0.85rem;
+}
+
+.job-table td {
+  padding: 16px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.9rem;
+}
+
+.job-table-score-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Simulator Form */
+.job-simulator-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.job-simulator-input {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background-color: rgba(255, 255, 255, 0.55);
+  color: var(--text-color);
+  font-size: 0.95rem;
+  outline: none;
+  transition: all var(--transition-normal);
+  min-width: 0; /* Prevents input from overflowing flex container */
+}
+
+html.dark .job-simulator-input {
+  background-color: rgba(15, 23, 42, 0.35);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.job-simulator-input:focus {
+  border-color: var(--primary);
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+html.dark .job-simulator-input:focus {
+  background-color: rgba(15, 23, 42, 0.55);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+.btn-simulate {
+  padding: 0 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  background: var(--primary);
+  color: white;
+  transition: all var(--transition-normal);
+  height: 48px;
+  white-space: nowrap;
+}
+
+.btn-simulate:hover:not(:disabled) {
+  background: var(--primary-hover);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Bottom Grid Gaps */
+.job-bottom-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 28px;
+}
+
+.job-bottom-grid > div {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Employer List */
+.employer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.employer-item:last-child {
+  border-bottom: none;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .job-main-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .job-dashboard-page {
+    padding: 16px;
+    gap: 20px;
+  }
+
+  .job-dashboard-header {
+    padding: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .job-dashboard-header-text h1 {
+    font-size: 1.5rem;
+  }
+
+  .job-dashboard-header-actions {
+    width: 100%;
+  }
+
+  .btn-recalc {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .metric-card-inner {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .metric-card-value {
+    font-size: 1.15rem;
+  }
+
+  .job-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Hide Industry column to save critical table space */
+  .job-table th:nth-child(2),
+  .job-table td:nth-child(2) {
+    display: none;
+  }
+
+  .job-table th, .job-table td {
+    padding: 10px 8px;
+    font-size: 0.8rem;
+  }
+  
+  .job-table-score-badge {
+    padding: 2px 6px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 580px) {
+  .job-simulator-form {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-simulate {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .job-card {
+    padding: 16px;
+  }
+  
+  /* Hide Remote column on narrow screens (already covered in top metrics card) */
+  .job-table th:nth-child(5),
+  .job-table td:nth-child(5) {
+    display: none;
+  }
+}

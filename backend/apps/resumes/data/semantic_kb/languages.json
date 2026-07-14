@@ -1,0 +1,9 @@
+{
+  "category": "LANGUAGE",
+  "entities": [
+    "English", "Hindi", "Gujarati", "French", "German", "Spanish", "Japanese", "Chinese",
+    "Mandarin", "Cantonese", "Russian", "Arabic", "Portuguese", "Italian", "Korean",
+    "Bengali", "Marathi", "Telugu", "Tamil", "Urdu", "Punjabi", "Dutch", "Swedish",
+    "Polish", "Turkish", "Vietnamese", "Thai", "Indonesian", "Greek", "Hebrew"
+  ]
+}

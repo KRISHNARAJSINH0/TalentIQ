@@ -1,0 +1,111 @@
+/* Background Floating Circles Animation */
+@keyframes float-circle-1 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes float-circle-2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-40px, 40px) scale(1.15);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes float-circle-3 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  40% {
+    transform: translate(50px, 30px) scale(0.9);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+/* Background circles styling */
+.floating-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.floating-circle {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(150px);
+  opacity: 0.05;
+}
+
+html.dark .floating-circle {
+  opacity: 0.07;
+}
+
+.circle-1 {
+  width: 400px;
+  height: 400px;
+  background: var(--primary);
+  top: 10%;
+  left: 15%;
+  animation: float-circle-1 15s infinite ease-in-out;
+}
+
+.circle-2 {
+  width: 500px;
+  height: 500px;
+  background: var(--secondary);
+  bottom: 10%;
+  right: 15%;
+  animation: float-circle-2 18s infinite ease-in-out;
+}
+
+.circle-3 {
+  width: 350px;
+  height: 350px;
+  background: var(--success);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: float-circle-3 20s infinite ease-in-out;
+}
+
+/* Shimmer Loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.12) 37%, rgba(255, 255, 255, 0.05) 63%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+html.dark .shimmer-bg {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.07) 37%, rgba(255, 255, 255, 0.03) 63%);
+  background-size: 200% 100%;
+}

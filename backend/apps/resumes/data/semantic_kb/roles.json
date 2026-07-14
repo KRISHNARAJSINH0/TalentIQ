@@ -1,0 +1,23 @@
+{
+  "category": "DESIGNATION",
+  "entities": [
+    "Software Engineer", "Backend Developer", "Frontend Developer", "Full Stack Developer",
+    "DevOps Engineer", "Data Scientist", "Machine Learning Engineer", "AI Engineer",
+    "Data Engineer", "Systems Architect", "Cloud Engineer", "Mobile App Developer",
+    "Product Manager", "Project Manager", "Scrum Master", "Engineering Manager",
+    "QA Engineer", "Test Automation Engineer", "Security Analyst", "Cybersecurity Specialist",
+    "UI/UX Designer", "Product Designer", "Graphic Designer", "Creative Director",
+    "Solutions Architect", "Technical Lead", "CTO", "Chief Technology Officer",
+    "Research Scientist", "Professor", "Assistant Professor", "Lecturer", "Postdoctoral Fellow",
+    "Medical Doctor", "Physician", "Surgeon", "Resident Doctor", "Registered Nurse",
+    "Attorney", "Legal Counsel", "Associate Attorney", "Lawyer", "Paralegal",
+    "Business Analyst", "Financial Analyst", "Management Consultant", "Accountant",
+    "Teacher", "High School Teacher", "Elementary Teacher", "Educator", "Academic Advisor",
+    "Intern", "Software Engineering Intern", "Graduate Assistant", "Student Researcher"
+  ],
+  "title_words": [
+    "Engineer", "Developer", "Analyst", "Manager", "Architect", "Scientist", "Professor",
+    "Consultant", "Designer", "Specialist", "Intern", "Director", "Lead", "Head", "Officer",
+    "Lead", "Principal", "Senior", "Junior", "Staff", "Fellow", "Administrator", "Advisor"
+  ]
+}

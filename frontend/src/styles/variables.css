@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Fonts */
+  --font-heading: 'Poppins', 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-number: 'Manrope', sans-serif;
+
+  /* Typography Scale */
+  --fs-h1: 48px;
+  --fs-h2: 32px;
+  --fs-section: 22px;
+  --fs-body: 15px;
+  --fs-metric: 40px;
+  --fs-subtext: 14px;
+
+  /* Spacing Tokens */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+  --space-64: 64px;
+
+  /* Colors (Light Theme by Default) */
+  --bg-primary: #F8FAFC;
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --secondary: #7C3AED;
+  --secondary-hover: #6D28D9;
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  
+  /* Glassmorphism Specs (Reduced Opacity / Subtle Blur) */
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(15, 23, 42, 0.08);
+  --glass-blur: 14px;
+  --glass-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+  
+  --text-color: #0F172A;
+  --subtext-color: #64748B;
+  --border-radius-card: 24px;
+  --border-radius-input: 16px;
+  --border-radius-badge: 8px;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #1D4ED8 0%, #6D28D9 100%);
+  --gradient-background: linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 50%, #F1F5F9 100%);
+  --gradient-card: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.25) 100%);
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow: 0.3s ease;
+}
+
+/* Dark Mode Theme Overrides */
+html.dark {
+  --bg-primary: #0B0F19;
+  --glass-bg: rgba(15, 23, 42, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  --text-color: #F1F5F9;
+  --subtext-color: #94A3B8;
+  --gradient-background: linear-gradient(135deg, #0B0F19 0%, #111827 50%, #0B0F19 100%);
+  --gradient-card: linear-gradient(135deg, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.2) 100%);
+}

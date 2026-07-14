@@ -1,0 +1,187 @@
+/* =============================================
+   Auth Pages – Login & Register (SaaS Glassmorphism)
+   ============================================= */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 24px;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--gradient-background);
+  background-attachment: fixed;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 48px 40px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--border-radius-card);
+  box-shadow: 0 10px 40px var(--glass-shadow);
+  position: relative;
+  z-index: 2;
+  transition: all var(--transition-normal);
+}
+
+.auth-card-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text-color);
+  text-align: center;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.auth-card-subtitle {
+  font-size: 0.95rem;
+  color: var(--subtext-color);
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-color);
+  font-family: var(--font-heading);
+}
+
+.auth-input {
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--border-radius-input);
+  color: var(--text-color);
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+html.dark .auth-input {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.auth-input::placeholder {
+  color: var(--subtext-color);
+  opacity: 0.5;
+}
+
+.auth-input:focus {
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+html.dark .auth-input:focus {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.auth-submit {
+  margin-top: 8px;
+  padding: 13px;
+  background: var(--gradient-primary);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--border-radius-input);
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: var(--font-heading);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.2);
+}
+
+.auth-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(37, 99, 235, 0.35);
+  background: var(--gradient-primary-hover);
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 28px;
+  font-size: 0.9rem;
+  color: var(--subtext-color);
+}
+
+.auth-footer a {
+  color: var(--primary);
+  font-weight: 600;
+  margin-left: 6px;
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Error styles */
+.auth-error {
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--border-radius-input);
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.auth-input-error {
+  border-color: var(--danger) !important;
+}
+
+.auth-field-error {
+  font-size: 0.78rem;
+  color: var(--danger);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+/* Row layout for first/last name */
+.auth-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Disabled submit */
+.auth-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 36px 24px;
+  }
+
+  .auth-row {
+    grid-template-columns: 1fr;
+  }
+}

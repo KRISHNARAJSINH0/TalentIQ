@@ -1,0 +1,10 @@
+{
+  "category": "ORGANIZATION",
+  "entities": [
+    "Information Technology", "Software Engineering", "FinTech", "Financial Services", "Banking",
+    "Healthcare", "Biotechnology", "Pharmaceuticals", "E-Commerce", "EdTech", "Education",
+    "Artificial Intelligence", "Cybersecurity", "Cloud Computing", "Aerospace", "Defense",
+    "Automotive", "Telecommunications", "Media & Entertainment", "Gaming", "Legal Services",
+    "Consulting", "Real Estate", "Supply Chain & Logistics", "Retail", "Manufacturing", "Energy"
+  ]
+}

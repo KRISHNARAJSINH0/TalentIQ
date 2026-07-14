@@ -1,0 +1,17 @@
+{
+  "category": "CERTIFICATE",
+  "entities": [
+    "AWS Certified Solutions Architect", "AWS Certified Developer", "AWS Certified Cloud Practitioner",
+    "Certified Kubernetes Administrator", "CKA", "Certified Kubernetes Application Developer", "CKAD",
+    "Google Professional Cloud Architect", "Microsoft Certified: Azure Solutions Architect",
+    "PMP", "Project Management Professional", "Certified ScrumMaster", "CSM", "PRINCE2 Practitioner",
+    "CISSP", "Certified Information Systems Security Professional", "CEH", "Certified Ethical Hacker",
+    "CompTIA Security+", "CompTIA Network+", "CompTIA A+", "CCNA", "Cisco Certified Network Associate",
+    "Stanford Online Machine Learning Specialization", "DeepLearning.AI TensorFlow Developer",
+    "Google Data Analytics Certificate", "Meta Front-End Developer Certificate",
+    "Oracle Certified Professional Java SE", "Salesforce Certified Administrator"
+  ],
+  "keywords": [
+    "Certified", "Certificate", "Training", "Course", "Diploma", "License", "Credential", "Certification", "Accredited"
+  ]
+}

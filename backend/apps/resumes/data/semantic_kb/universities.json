@@ -1,0 +1,19 @@
+{
+  "category": "UNIVERSITY",
+  "entities": [
+    "MIT", "Massachusetts Institute of Technology", "Stanford University", "Harvard University",
+    "University of Oxford", "University of Cambridge", "Caltech", "California Institute of Technology",
+    "UC Berkeley", "University of California Berkeley", "ETH Zurich", "Imperial College London",
+    "Columbia University", "Princeton University", "Yale University", "Cornell University",
+    "University of Chicago", "NYU", "New York University", "Carnegie Mellon University", "CMU",
+    "UCLA", "University of California Los Angeles", "University of Toronto", "McGill University",
+    "IIT Bombay", "IIT Delhi", "IIT Madras", "IIT Kanpur", "IIT Kharagpur", "IIT Roorkee",
+    "BITS Pilani", "Delhi University", "Anna University", "Gujarat Technological University",
+    "National University of Singapore", "NUS", "Nanyang Technological University", "NTU",
+    "Tsinghua University", "Peking University", "University of Tokyo"
+  ],
+  "keywords": [
+    "University", "Institute", "College", "Academy", "School", "Campus", "Polytechnic",
+    "Conservatory", "Faculty", "Seminary", "IIT", "NIT", "BITS", "UC", "SUNY"
+  ]
+}

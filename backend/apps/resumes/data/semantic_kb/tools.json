@@ -1,0 +1,10 @@
+{
+  "category": "TECHNOLOGY",
+  "entities": [
+    "VS Code", "Visual Studio", "IntelliJ IDEA", "PyCharm", "WebStorm", "Eclipse", "Xcode",
+    "Postman", "Insomnia", "Swagger", "Jira", "Confluence", "Trello", "Asana", "Notion", "Slack",
+    "Figma", "Sketch", "Adobe XD", "Photoshop", "Illustrator", "InDesign", "Canva", "Blender",
+    "Git", "GitHub", "GitLab", "Bitbucket", "Docker Desktop", "Wireshark", "Burp Suite",
+    "Google Analytics", "Mixpanel", "Amplitude", "Tableau", "Power BI", "Excel", "STATA", "SPSS"
+  ]
+}

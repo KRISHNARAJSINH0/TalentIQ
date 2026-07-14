@@ -1,0 +1,155 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: resumeai_db_prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - backend_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: resumeai_redis_prod
+    restart: unless-stopped
+    volumes:
+      - redis_data_prod:/data
+    networks:
+      - backend_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: resumeai_backend_prod
+    restart: unless-stopped
+    environment:
+      - DEBUG=False
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - SECRET_KEY=${SECRET_KEY}
+    volumes:
+      - static_volume_prod:/app/staticfiles
+      - media_volume_prod:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - backend_net
+      - frontend_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: resumeai_frontend_prod
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - frontend_net
+
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: resumeai_celery_prod
+    restart: unless-stopped
+    command: celery -A config worker --loglevel=info
+    environment:
+      - DEBUG=False
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - SECRET_KEY=${SECRET_KEY}
+    volumes:
+      - media_volume_prod:/app/media
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - backend_net
+
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: resumeai_celery_beat_prod
+    restart: unless-stopped
+    command: celery -A config beat --loglevel=info
+    environment:
+      - DEBUG=False
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - SECRET_KEY=${SECRET_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - backend_net
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: resumeai_nginx_prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - static_volume_prod:/app/staticfiles
+      - media_volume_prod:/app/media
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - frontend_net
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:
+  static_volume_prod:
+  media_volume_prod:
+
+networks:
+  backend_net:
+    driver: bridge
+  frontend_net:
+    driver: bridge

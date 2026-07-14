@@ -1,0 +1,44 @@
+/* Dark/Light mode generic styles */
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-color);
+  font-family: var(--font-body);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--text-color);
+  font-weight: 700;
+}
+
+p {
+  color: var(--subtext-color);
+}
+
+.text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(124, 92, 246, 0.2);
+  border-radius: var(--border-radius-badge);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 92, 246, 0.4);
+}

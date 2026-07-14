@@ -1,0 +1,118 @@
+/* Responsive Layout Utilities */
+
+.saas-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+  overflow-x: hidden;
+  color: var(--text-color);
+  background: var(--gradient-background);
+  background-attachment: fixed;
+}
+
+.saas-main-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0; /* Prevents flex items from overflowing */
+  min-height: 100vh;
+  position: relative;
+  transition: padding var(--transition-normal);
+}
+
+/* Default Padding on Desktop: adjust for left sidebar */
+.saas-main-container.sidebar-expanded {
+  padding-left: 320px;
+}
+
+.saas-main-container.sidebar-collapsed {
+  padding-left: 120px;
+}
+
+/* Content Area */
+.saas-content {
+  flex: 1;
+  padding: 24px;
+  width: 100%;
+  max-width: 1600px;
+  min-width: 0;
+  margin: 0 auto;
+  padding-bottom: 60px; /* space for bottom padding */
+}
+
+/* Tablet Media Queries */
+@media (max-width: 992px) {
+  .saas-main-container.sidebar-expanded,
+  .saas-main-container.sidebar-collapsed {
+    padding-left: 90px; /* Only icon sidebar shown on tablet */
+  }
+
+  .grid-two-col,
+  .grid-three-col,
+  .spacy-entity-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Mobile Media Queries */
+@media (max-width: 768px) {
+  .saas-main-container.sidebar-expanded,
+  .saas-main-container.sidebar-collapsed {
+    padding-left: 0; /* Sidebar becomes temporary drawer on mobile */
+  }
+  
+  .saas-content {
+    padding: 16px;
+    padding-bottom: 100px; /* extra space for bottom mobile nav */
+  }
+
+  /* Full width for inputs and textareas on mobile */
+  input, select, textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Card and Panel padding optimization on small viewports */
+  .details-card,
+  .upload-card,
+  .history-card,
+  .profile-card,
+  .gemini-engine-card {
+    padding: 16px !important;
+  }
+
+  /* Responsive header action buttons */
+  .review-header-actions,
+  .extraction-viewer-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Table Horizontal Scrolling container */
+  .table-responsive,
+  .audit-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent awkward line wraps on status badges */
+  .badge-status,
+  .indicator-badge,
+  .badge {
+    white-space: nowrap;
+  }
+}
+
+/* Hide on Mobile/Desktop utilities */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hide-on-desktop {
+    display: none !important;
+  }
+}

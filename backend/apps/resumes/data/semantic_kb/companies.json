@@ -1,0 +1,20 @@
+{
+  "category": "COMPANY",
+  "entities": [
+    "Google", "Microsoft", "Amazon", "Apple", "Meta", "Facebook", "Netflix", "IBM", "Intel",
+    "Oracle", "Cisco", "Adobe", "Salesforce", "NVIDIA", "AMD", "Tesla", "SpaceX", "Uber",
+    "Airbnb", "Stripe", "Palantir", "Snowflake", "Databricks", "Twilio", "Atlassian",
+    "Accenture", "TCS", "Tata Consultancy Services", "Infosys", "Wipro", "Cognizant",
+    "Capgemini", "Deloitte", "PwC", "PricewaterhouseCoopers", "EY", "Ernst & Young", "KPMG",
+    "McKinsey & Company", "Boston Consulting Group", "BCG", "Bain & Company",
+    "JPMorgan Chase", "Goldman Sachs", "Morgan Stanley", "Bank of America", "Citigroup",
+    "Wells Fargo", "Barclays", "HSBC", "Visa", "Mastercard", "PayPal",
+    "Pfizer", "Novartis", "Roche", "Johnson & Johnson", "AstraZeneca", "Moderna",
+    "Siemens", "General Electric", "Boeing", "Lockheed Martin", "Airbus",
+    "Samsung", "Sony", "LG", "Toyota", "Ford", "General Motors"
+  ],
+  "patterns": [
+    "Inc", "Inc.", "Corp", "Corp.", "Corporation", "Ltd", "Ltd.", "Limited", "LLC", "L.L.C.",
+    "Technologies", "Tech", "Solutions", "Services", "Group", "Global", "Holdings", "Labs", "Studios"
+  ]
+}
