@@ -16,7 +16,8 @@ const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
-  return `${window.location.protocol}//${hostname}:8000/api`;
+  // Default fallback to local Django server for development/testing when no production API env var is defined
+  return 'http://localhost:8000/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
