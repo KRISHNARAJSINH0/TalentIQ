@@ -299,50 +299,83 @@ const PortfolioDashboard = () => {
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <a
-                href={publicUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  color: 'var(--primary)',
-                  fontWeight: 600,
-                  fontSize: '0.9rem',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  wordBreak: 'break-all'
-                }}
-              >
-                {portfolio?.slug ? `/portfolio/${portfolio.slug}` : 'No URL generated'}
-                <HiOutlineArrowTopRightOnSquare size={16} />
-              </a>
+              {portfolio?.slug ? (
+                <a
+                  href={publicUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: 'var(--primary)',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    wordBreak: 'break-all'
+                  }}
+                >
+                  /portfolio/{portfolio.slug}
+                  <HiOutlineArrowTopRightOnSquare size={16} />
+                </a>
+              ) : (
+                <span style={{ color: 'var(--subtext-color)', fontSize: '0.9rem' }}>
+                  No URL generated. Please click "Regenerate Site" above.
+                </span>
+              )}
             </div>
 
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <a
-                href={publicUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="glass-panel"
-                style={{
-                  flex: 1,
-                  textAlign: 'center',
-                  display: 'inline-flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '10.5px',
-                  borderRadius: '10px',
-                  color: 'var(--text-color)',
-                  textDecoration: 'none',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                  minWidth: '110px'
-                }}
-              >
-                👁️ Live Preview
-              </a>
+              {portfolio?.slug ? (
+                <a
+                  href={publicUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass-panel"
+                  style={{
+                    flex: 1,
+                    textAlign: 'center',
+                    display: 'inline-flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '10.5px',
+                    borderRadius: '10px',
+                    color: 'var(--text-color)',
+                    textDecoration: 'none',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    minWidth: '110px'
+                  }}
+                >
+                  👁️ Live Preview
+                </a>
+              ) : (
+                <button
+                  className="glass-panel"
+                  style={{
+                    flex: 1,
+                    textAlign: 'center',
+                    display: 'inline-flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '10.5px',
+                    borderRadius: '10px',
+                    color: 'var(--subtext-color)',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    minWidth: '110px',
+                    cursor: 'not-allowed',
+                    opacity: 0.5,
+                    border: 'none',
+                    background: 'rgba(255, 255, 255, 0.01)'
+                  }}
+                  disabled
+                >
+                  👁️ Live Preview
+                </button>
+              )}
               
               <button
                 onClick={handleCopyLink}

@@ -35,7 +35,19 @@ axiosInstance.interceptors.request.use(
   (config) => {
     const tokens = JSON.parse(localStorage.getItem('tokens') || 'null');
     if (tokens?.access) {
-      config.headers.Authorization = `Bearer ${tokens.access}`;
+      if (config.headers.set) {
+        config.headers.set('Authorization', `Bearer ${tokens.access}`);
+      } else {
+        config.headers.Authorization = `Bearer ${tokens.access}`;
+      }
+    } else {
+      if (config.headers.delete) {
+        config.headers.delete('Authorization');
+        config.headers.delete('authorization');
+      } else {
+        delete config.headers.Authorization;
+        delete config.headers.authorization;
+      }
     }
     return config;
   },
@@ -108,12 +120,18 @@ axiosInstance.interceptors.response.use(
         localStorage.removeItem('tokens');
         localStorage.removeItem('user');
 
-        const isPublicPath = /^\/portfolio\/[^/]+$/.test(window.location.pathname) || window.location.pathname.startsWith('/u/');
+        const isPublicPath = /^\/portfolio\/[^/]+\/?$/.test(window.location.pathname) || window.location.pathname.startsWith('/u/');
         if (!isPublicPath) {
           window.location.href = '/login';
           return Promise.reject(refreshError);
         }
-        delete originalRequest.headers.Authorization;
+        if (originalRequest.headers.delete) {
+          originalRequest.headers.delete('Authorization');
+          originalRequest.headers.delete('authorization');
+        } else {
+          delete originalRequest.headers.Authorization;
+          delete originalRequest.headers.authorization;
+        }
         return axiosInstance(originalRequest);
       } finally {
         isRefreshing = false;
