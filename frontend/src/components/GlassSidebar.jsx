@@ -1,12 +1,38 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as Hi2 from 'react-icons/hi2';
+import resumesAPI from '../api/resumes';
 
 const GlassSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [activeResumeId, setActiveResumeId] = useState(null);
+
+  useEffect(() => {
+    const fetchActiveResume = async () => {
+      try {
+        const response = await resumesAPI.getResumes();
+        const data = response.data.results || response.data;
+        if (Array.isArray(data)) {
+          const active = data.find(r => r.is_active);
+          if (active) {
+            setActiveResumeId(active.id);
+          } else {
+            setActiveResumeId(null);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch active resume for sidebar:', err);
+      }
+    };
+
+    if (user) {
+      fetchActiveResume();
+    }
+  }, [user, location.pathname]);
 
   const handleLogout = async () => {
     await logout();
@@ -17,7 +43,7 @@ const GlassSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
     { to: '/dashboard', label: 'Dashboard', icon: <Hi2.HiOutlineSquares2X2 size={20} /> },
     { to: '/resumes', label: 'Resume', icon: <Hi2.HiOutlineDocumentText size={20} /> },
     { to: '/resumes', label: 'Parser', icon: <Hi2.HiOutlineArrowUpTray size={20} />, hash: '#upload' },
-    { to: '/resumes', label: 'ATS', icon: <Hi2.HiOutlineCpuChip size={20} /> },
+    { to: activeResumeId ? `/resumes/${activeResumeId}/ats` : '/resumes', label: 'ATS', icon: <Hi2.HiOutlineCpuChip size={20} /> },
     {to: '/portfolio', label: 'Portfolio', icon: <Hi2.HiOutlineGlobeAlt size={20} />},
     {to: '/career', label: 'Career Assistant', icon: <Hi2.HiOutlineChatBubbleLeftRight size={20} />},
     {to: '/career/reputation', label: 'Reputation', icon: <Hi2.HiOutlineCheckBadge size={20} />},
@@ -90,7 +116,7 @@ const GlassSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
           return (
             <Link
               key={index}
-              to={item.to}
+              to={item.hash ? `${item.to}${item.hash}` : item.to}
               onClick={() => setIsMobileOpen(false)}
               style={{
                 display: 'flex',

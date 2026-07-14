@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import resumesAPI from '../api/resumes';
 import GlassCard from '../components/GlassCard';
 import GlassInput from '../components/GlassInput';
@@ -16,6 +16,7 @@ import {
 
 const Resumes = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -30,6 +31,26 @@ const Resumes = () => {
   useEffect(() => {
     fetchResumes();
   }, []);
+
+  useEffect(() => {
+    if (location.hash === '#upload') {
+      // Small timeout to ensure the DOM has fully rendered
+      const timer = setTimeout(() => {
+        const element = document.querySelector('.upload-dropzone');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Temporarily highlight the border to draw attention
+          element.style.borderColor = 'var(--primary)';
+          element.style.boxShadow = '0 0 15px rgba(37, 99, 235, 0.2)';
+          setTimeout(() => {
+            element.style.borderColor = '';
+            element.style.boxShadow = '';
+          }, 2000);
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [location.hash]);
 
   const fetchResumes = async () => {
     try {
