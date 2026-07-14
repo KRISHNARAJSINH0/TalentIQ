@@ -113,6 +113,7 @@ const PortfolioPublic = () => {
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [toastMessage, setToastMessage] = useState('');
   
   // Section refs for tracking views
   const sectionRefs = {
@@ -133,7 +134,13 @@ const PortfolioPublic = () => {
         setPortfolio(res.data);
       } catch (err) {
         console.error(err);
-        setError('Portfolio not found or set to private.');
+        if (err.response?.status === 404) {
+          setError('Page Not Found');
+        } else if (err.response?.status === 403) {
+          setError('Access Restricted');
+        } else {
+          setError('Portfolio not found or set to private.');
+        }
       } finally {
         setLoading(false);
       }
@@ -210,7 +217,8 @@ const PortfolioPublic = () => {
         event_type: 'share',
       });
       await navigator.clipboard.writeText(window.location.href);
-      alert('Portfolio URL copied to clipboard!');
+      setToastMessage('Portfolio URL copied to clipboard!');
+      setTimeout(() => setToastMessage(''), 3000);
     } catch (err) {
       console.error(err);
     }
@@ -304,14 +312,40 @@ const PortfolioPublic = () => {
     );
   }
 
-  if (error || !portfolio) {
+  if (error === 'Page Not Found' || !portfolio) {
     return (
-      <div style={{ background: '#0f172a', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#fff', padding: '24px' }}>
-        <div style={{ textAlign: 'center', maxWidth: '500px', border: '1px solid rgba(239,68,68,0.2)', padding: '32px', borderRadius: '12px', background: 'rgba(30,41,59,0.5)' }}>
-          <span style={{ fontSize: '3rem' }}>🔒</span>
-          <h2 style={{ marginTop: '16px', color: '#EF4444' }}>Access Restricted</h2>
-          <p style={{ color: '#94a3b8', margin: '16px 0 24px', lineHeight: '1.6' }}>{error || 'This portfolio is private or does not exist.'}</p>
-          <Link to="/dashboard" className="btn btn-primary" style={{ padding: '10px 20px' }}>Go to Dashboard</Link>
+      <div style={{ background: 'linear-gradient(135deg, #090d16 0%, #05070c 100%)', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#fff', padding: '24px', fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ textAlign: 'center', maxWidth: '500px', border: '1px solid rgba(255,255,255,0.08)', padding: '48px 32px', borderRadius: '24px', background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(16px)', boxShadow: '0 8px 32px 0 rgba(0,0,0,0.37)' }}>
+          <div style={{ fontSize: '6rem', fontWeight: 900, background: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: '0 0 10px 0', lineHeight: 1 }}>404</div>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '16px', color: '#f8fafc' }}>Page Not Found</h2>
+          <p style={{ color: '#94a3b8', margin: '16px 0 32px', lineHeight: '1.6', fontSize: '0.95rem' }}>
+            The portfolio you are looking for does not exist, has been moved, or the URL slug is incorrect.
+          </p>
+          <Link to="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 28px', borderRadius: '12px', background: 'linear-gradient(135deg, #38bdf8 0%, #6366f1 100%)', color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: '0.95rem', boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)' }}>
+            Go to Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (error === 'Access Restricted' || error === 'Portfolio not found or set to private.') {
+    return (
+      <div style={{ background: 'linear-gradient(135deg, #090d16 0%, #05070c 100%)', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#fff', padding: '24px', fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ textAlign: 'center', maxWidth: '500px', border: '1px solid rgba(239, 68, 68, 0.15)', padding: '48px 32px', borderRadius: '24px', background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(16px)', boxShadow: '0 8px 32px 0 rgba(0,0,0,0.37)' }}>
+          <span style={{ fontSize: '4rem', filter: 'drop-shadow(0 0 10px rgba(239, 68, 68, 0.3))' }}>🔒</span>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '20px', color: '#f8fafc' }}>Access Restricted</h2>
+          <p style={{ color: '#94a3b8', margin: '16px 0 32px', lineHeight: '1.6', fontSize: '0.95rem' }}>
+            This portfolio is set to private by the owner. Please contact them or log in to view it if you are the owner.
+          </p>
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+            <Link to="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: '0.95rem', boxShadow: '0 4px 14px rgba(99, 102, 241, 0.3)' }}>
+              Log In
+            </Link>
+            <Link to="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '12px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: '0.95rem' }}>
+              Dashboard
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -624,6 +658,46 @@ const PortfolioPublic = () => {
         )}
 
       </div>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div style={{
+          position: 'fixed',
+          bottom: '30px',
+          right: '30px',
+          background: 'rgba(30, 41, 59, 0.85)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(99, 102, 241, 0.3)',
+          color: '#fff',
+          padding: '16px 24px',
+          borderRadius: '12px',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: '0.95rem',
+          fontWeight: 600,
+          animation: 'slideIn 0.3s ease-out'
+        }}>
+          <span style={{ color: '#818cf8', fontSize: '1.2rem' }}>✓</span>
+          {toastMessage}
+        </div>
+      )}
+
+      {/* Animation keyframes */}
+      <style>{`
+        @keyframes slideIn {
+          from {
+            transform: translateY(100px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
     </div>
   );
 };

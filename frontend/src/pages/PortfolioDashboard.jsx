@@ -136,6 +136,18 @@ const PortfolioDashboard = () => {
     }
   };
 
+  const handleCopyLink = async () => {
+    if (!portfolio?.slug) return;
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      setSuccess('Portfolio link copied to clipboard!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to copy link.');
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -162,6 +174,25 @@ const PortfolioDashboard = () => {
         </div>
         
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <button
+            onClick={handleCopyLink}
+            className="glass-panel"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 18px',
+              borderRadius: '12px',
+              color: 'var(--text-color)',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              fontWeight: 600
+            }}
+          >
+            <HiOutlineLink size={18} style={{ color: 'var(--primary)' }} /> Share Link
+          </button>
+
           <Link to="/portfolio/analytics" className="glass-panel" style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -288,7 +319,7 @@ const PortfolioDashboard = () => {
               </a>
             </div>
 
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <a
                 href={publicUrl}
                 target="_blank"
@@ -301,22 +332,25 @@ const PortfolioDashboard = () => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   gap: '6px',
-                  padding: '10px',
+                  padding: '10.5px',
                   borderRadius: '10px',
                   color: 'var(--text-color)',
                   textDecoration: 'none',
                   fontSize: '0.85rem',
-                  fontWeight: 600
+                  fontWeight: 600,
+                  minWidth: '110px'
                 }}
               >
                 👁️ Live Preview
               </a>
               
               <button
-                onClick={handlePrivacyToggle}
+                onClick={handleCopyLink}
                 className="glass-panel"
                 style={{
+                  flex: 1,
                   display: 'inline-flex',
+                  justifyContent: 'center',
                   alignItems: 'center',
                   gap: '6px',
                   padding: '10px 16px',
@@ -325,7 +359,31 @@ const PortfolioDashboard = () => {
                   fontWeight: 600,
                   border: 'none',
                   cursor: 'pointer',
-                  color: 'var(--text-color)'
+                  color: 'var(--text-color)',
+                  minWidth: '110px'
+                }}
+              >
+                <HiOutlineLink size={16} style={{ color: 'var(--primary)' }} />
+                Copy Link
+              </button>
+
+              <button
+                onClick={handlePrivacyToggle}
+                className="glass-panel"
+                style={{
+                  flex: 1,
+                  display: 'inline-flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--text-color)',
+                  minWidth: '110px'
                 }}
                 disabled={savingPrivacy}
               >
