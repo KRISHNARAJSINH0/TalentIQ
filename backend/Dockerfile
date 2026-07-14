@@ -24,6 +24,9 @@ RUN python -m spacy download en_core_web_sm || true
 # Copy backend files
 COPY . /app/
 
+# Compile static files for production WhiteNoise serving
+RUN python manage.py collectstatic --noinput
+
 # Create group and user to run the container as non-root
 RUN groupadd -r django && useradd -r -g django django-user
 RUN chown -R django-user:django /app
