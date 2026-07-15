@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
 
 from .entity_classifier import EntityClassifier
 from .ontology_engine import VALIDATION_CATEGORIES
