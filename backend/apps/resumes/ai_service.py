@@ -6,6 +6,9 @@ import logging
 from django.conf import settings
 from django.utils import timezone
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module="google.generativeai")
+
 # pyrefly: ignore [missing-import]
 import google.generativeai as genai
 # pyrefly: ignore [missing-import]

@@ -1,7 +1,7 @@
-import multiprocessing
+import os
 
-# Gunicorn socket binding
-bind = "0.0.0.0:8000"
+# Gunicorn socket binding — Render sets PORT=10000, fallback to 8000 for local dev
+bind = f"0.0.0.0:{os.environ.get('PORT', '8000')}"
 
 # Production concurrency adjustments
 workers = 2
