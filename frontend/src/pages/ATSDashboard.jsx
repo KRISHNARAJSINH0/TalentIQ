@@ -322,7 +322,7 @@ const ATSDashboard = () => {
         </div>
 
         {/* Charts & Visualization layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '24px', marginBottom: '24px' }}>
+        <div className="ats-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '24px', marginBottom: '24px' }}>
           
           {/* Radar Chart */}
           <div className="ats-card" style={{ marginBottom: 0 }}>

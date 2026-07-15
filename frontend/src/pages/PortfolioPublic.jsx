@@ -437,15 +437,56 @@ const PortfolioPublic = () => {
           border-radius: 50%;
           background: ${styles.accent};
         }
+
+        /* ===== Mobile Responsiveness for Portfolio Public ===== */
+        @media (max-width: 768px) {
+          .pf-container {
+            padding: 0 12px;
+          }
+          .pf-card {
+            padding: 20px 16px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+          }
+          .pf-title {
+            font-size: 1.15rem;
+            margin-bottom: 16px;
+          }
+          .pf-btn {
+            padding: 8px 14px;
+            font-size: 0.8rem;
+          }
+          .pf-timeline-item {
+            padding-left: 16px;
+            margin-bottom: 16px;
+          }
+          .pf-tag {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .pf-container {
+            padding: 0 8px;
+          }
+          .pf-card {
+            padding: 16px 12px;
+            margin-bottom: 16px;
+          }
+          .pf-title {
+            font-size: 1rem;
+          }
+        }
       `}</style>
 
       {/* Navigation Header */}
-      <div style={{ borderBottom: `1px solid ${styles.borderColor}`, padding: '16px 0', marginBottom: '40px' }}>
-        <div className="pf-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ borderBottom: `1px solid ${styles.borderColor}`, padding: '12px 0', marginBottom: '24px' }}>
+        <div className="pf-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <span style={{ fontSize: '1.25rem', fontWeight: 800, color: styles.accent, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
             <HiOutlineGlobeAlt /> {data.first_name || 'Portfolio'}
           </span>
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button onClick={handleShareLog} className="pf-btn pf-btn-outline" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
               <HiOutlineShare /> Share
             </button>
@@ -459,7 +500,7 @@ const PortfolioPublic = () => {
       <div className="pf-container">
         
         {/* HERO SECTION */}
-        <section id="hero" ref={sectionRefs.hero} className="pf-card" style={{ textAlign: 'center', padding: '60px 24px' }}>
+        <section id="hero" ref={sectionRefs.hero} className="pf-card pf-hero-section" style={{ textAlign: 'center', padding: '40px 16px' }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -483,7 +524,7 @@ const PortfolioPublic = () => {
               {data.first_name?.[0]}{data.last_name?.[0]}
             </div>
 
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '10px' }}>
+            <h1 style={{ fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', fontWeight: 800, marginBottom: '10px' }}>
               {data.first_name} {data.last_name}
             </h1>
             <p style={{ fontSize: '1.25rem', color: styles.accent, fontWeight: 600, marginBottom: '8px' }}>

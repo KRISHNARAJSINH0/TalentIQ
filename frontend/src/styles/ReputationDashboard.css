@@ -825,3 +825,119 @@ html.dark .empty-overlay-card {
   margin: 0 0 12px 0;
   font-family: var(--font-body);
 }
+
+/* =============================================
+   Reputation Dashboard – Mobile Responsiveness
+   ============================================= */
+@media (max-width: 768px) {
+  .reputation-page {
+    padding: 12px;
+    gap: 16px;
+  }
+
+  .reputation-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+    gap: 12px;
+  }
+
+  .reputation-header-text h1 {
+    font-size: 1.35rem;
+  }
+
+  .reputation-header-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .resume-select,
+  .btn-recalc {
+    width: 100%;
+  }
+
+  .reputation-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .hero-progress-card {
+    padding: 24px;
+  }
+
+  .progress-ring-container {
+    width: 160px;
+    height: 160px;
+    margin-bottom: 20px;
+  }
+
+  .progress-score-num {
+    font-size: 2.8rem;
+  }
+
+  .reputation-sec-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .benchmarks-card,
+  .badges-card {
+    padding: 20px;
+  }
+
+  .badges-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .badge-item-card {
+    padding: 14px 10px;
+  }
+
+  .badge-icon-wrapper {
+    font-size: 1.8rem;
+    width: 48px;
+    height: 48px;
+  }
+
+  .reputation-details-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .details-card {
+    padding: 20px;
+  }
+
+  .suggestion-row {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .btn-action-suggest {
+    width: 100%;
+    text-align: center;
+  }
+
+  .reputation-onboarding-container {
+    padding: 20px 12px;
+    gap: 24px;
+  }
+
+  .onboarding-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .onboarding-cta {
+    padding: 24px;
+  }
+
+  .empty-overlay-card {
+    padding: 24px;
+    top: 40%;
+  }
+}
+

@@ -46,7 +46,7 @@ const Dashboard = () => {
         const resAts = await atsAPI.getATSHistory();
         const atsData = Array.isArray(resAts.data) ? resAts.data : (resAts.data?.results || []);
         if (atsData.length > 0) {
-          setAtsScore(atsData[0].ats_score || atsData[0].score || 78);
+          setAtsScore(atsData[0].ats_score || atsData[0].score || 0);
         } else {
           setAtsScore(0);
         }
@@ -92,22 +92,23 @@ const Dashboard = () => {
   const total = profileFields.length;
   const completion = Math.round((filled / total) * 100);
 
-  // views data setup
+  // views data — distribute real portfolio views across the week
   const viewsData = [
-    { name: 'Mon', views: Math.max(0, portfolioViews - 12) },
-    { name: 'Tue', views: Math.max(0, portfolioViews - 8) },
-    { name: 'Wed', views: Math.max(0, portfolioViews - 5) },
-    { name: 'Thu', views: Math.max(0, portfolioViews - 2) },
-    { name: 'Fri', views: portfolioViews },
+    { name: 'Mon', views: Math.round(portfolioViews * 0.12) },
+    { name: 'Tue', views: Math.round(portfolioViews * 0.18) },
+    { name: 'Wed', views: Math.round(portfolioViews * 0.22) },
+    { name: 'Thu', views: Math.round(portfolioViews * 0.20) },
+    { name: 'Fri', views: Math.round(portfolioViews * 0.28) },
   ];
 
-  // Radar metrics setup
+  // Radar metrics — all sourced from real API data
+  const skillsPercent = Math.min(100, resumes.length > 0 ? Math.round((resumes.filter(r => r.is_active).length / Math.max(resumes.length, 1)) * 100) : 0);
   const skillStrengthData = [
-    { subject: 'Skills', A: 85 },
-    { subject: 'ATS Score', A: atsScore || 70 },
+    { subject: 'Skills', A: skillsPercent || 0 },
+    { subject: 'ATS Score', A: atsScore || 0 },
     { subject: 'Profile %', A: completion },
-    { subject: 'Projects', A: projectCount * 20 > 100 ? 100 : projectCount * 20 || 30 },
-    { subject: 'Career', A: careerScore || 65 },
+    { subject: 'Projects', A: Math.min(100, projectCount * 20) },
+    { subject: 'Career', A: careerScore || 0 },
   ];
 
   // Helper for Area Chart SVG points calculation
@@ -203,7 +204,7 @@ const Dashboard = () => {
             value={atsScore || 'N/A'}
             suffix="%"
             icon={<HiOutlineCpuChip size={20} />}
-            trend={atsScore ? '+4% improvement' : 'No analysis run'}
+            trend={atsScore ? `Score: ${Math.round(atsScore)}%` : 'No analysis run'}
             trendType={atsScore >= 75 ? 'success' : 'warning'}
             delay={0.1}
           />
@@ -214,7 +215,7 @@ const Dashboard = () => {
             value={careerScore || 'N/A'}
             suffix="%"
             icon={<HiOutlineSparkles size={20} />}
-            trend={careerScore ? 'Top 15% tier' : 'Needs initialization'}
+            trend={careerScore ? `Readiness: ${Math.round(careerScore)}%` : 'Upload resume first'}
             trendType={careerScore >= 80 ? 'success' : 'warning'}
             delay={0.2}
           />
@@ -224,8 +225,8 @@ const Dashboard = () => {
             title="Portfolio Views"
             value={portfolioViews}
             icon={<HiOutlineEye size={20} />}
-            trend="+18% this week"
-            trendType="success"
+            trend={portfolioViews > 0 ? `${portfolioViews} total views` : 'No views yet'}
+            trendType={portfolioViews > 0 ? 'success' : 'warning'}
             delay={0.3}
           />
         </div>

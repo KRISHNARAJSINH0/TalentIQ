@@ -466,3 +466,85 @@ html.dark .timeline-table th {
 html.dark .timeline-table td {
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
+
+/* =============================================
+   Timeline – Mobile Responsiveness
+   ============================================= */
+@media (max-width: 768px) {
+  .timeline-container {
+    margin: 80px auto 40px;
+    padding: 0 12px;
+  }
+
+  .timeline-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .timeline-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .timeline-tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px;
+  }
+
+  .timeline-tab-btn {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+
+  .timeline-track-wrapper {
+    padding-left: 36px;
+  }
+
+  .timeline-track-wrapper::before {
+    left: 13px;
+  }
+
+  .timeline-node-icon {
+    left: -36px;
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+  }
+
+  .timeline-card {
+    padding: 16px;
+  }
+
+  .timeline-card-header {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .timeline-card-title {
+    font-size: 1rem;
+  }
+
+  .timeline-card-panel {
+    padding: 16px;
+  }
+
+  .compare-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .compare-selector {
+    padding: 16px;
+  }
+
+  .diff-tag {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+  }
+
+  .timeline-table {
+    font-size: 0.82rem;
+  }
+}
+

@@ -54,7 +54,9 @@
   }
 }
 
-/* Mobile Media Queries */
+/* =============================================
+   Mobile Media Queries (≤768px)
+   ============================================= */
 @media (max-width: 768px) {
   .saas-main-container.sidebar-expanded,
   .saas-main-container.sidebar-collapsed {
@@ -62,7 +64,7 @@
   }
   
   .saas-content {
-    padding: 16px;
+    padding: 12px;
     padding-bottom: 100px; /* extra space for bottom mobile nav */
   }
 
@@ -72,12 +74,51 @@
     box-sizing: border-box;
   }
 
+  /* --- Global Heading Sizes --- */
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.05rem !important; }
+
+  /* --- Metric & Stat Grids --- */
+  .row.g-4 > [class*="col-xl-3"],
+  .row.g-4 > [class*="col-lg-4"],
+  .row.g-4 > [class*="col-lg-8"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .row.g-4 > [class*="col-sm-6"] {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  /* --- SVG Chart Containers --- */
+  .svg-chart-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .svg-chart-container svg {
+    min-width: 280px;
+    width: 100%;
+    height: auto;
+  }
+
+  /* --- Inline Grid Overrides --- */
+  [style*="grid-template-columns: 1fr 1.2fr"],
+  [style*="grid-template-columns: 2fr 1fr"],
+  [style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+  }
+
   /* Card and Panel padding optimization on small viewports */
   .details-card,
   .upload-card,
   .history-card,
   .profile-card,
-  .gemini-engine-card {
+  .gemini-engine-card,
+  .ats-card,
+  .glass-card {
     padding: 16px !important;
   }
 
@@ -102,6 +143,36 @@
   .badge {
     white-space: nowrap;
   }
+
+  /* --- Button Groups --- */
+  .btn-group,
+  [style*="display: flex"][style*="gap"] {
+    flex-wrap: wrap !important;
+  }
+
+  /* --- Glass Card fixed heights to auto --- */
+  .glass-card[style*="height: 420px"],
+  .glass-card[style*="height: 300px"] {
+    height: auto !important;
+    min-height: unset !important;
+  }
+}
+
+/* =============================================
+   Small Phone (≤480px)
+   ============================================= */
+@media (max-width: 480px) {
+  .saas-content {
+    padding: 8px;
+    padding-bottom: 100px;
+  }
+
+  .row.g-4 > [class*="col-sm-6"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  h1 { font-size: 1.25rem !important; }
 }
 
 /* Hide on Mobile/Desktop utilities */
@@ -116,3 +187,4 @@
     display: none !important;
   }
 }
+

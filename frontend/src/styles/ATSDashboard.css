@@ -394,3 +394,114 @@
   fill: url(#bar-grad-hover);
   filter: drop-shadow(0 0 6px rgba(37, 99, 235, 0.5));
 }
+
+/* =============================================
+   ATS Dashboard – Mobile Responsiveness
+   ============================================= */
+@media (max-width: 768px) {
+  .ats-dashboard-page {
+    padding: 16px 12px 60px;
+  }
+
+  .ats-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .ats-header-title {
+    font-size: 1.25rem;
+  }
+
+  .ats-score-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .ats-overall-score-card {
+    padding: 20px;
+  }
+
+  .circular-progress-container {
+    width: 140px;
+    height: 140px;
+    margin-bottom: 12px;
+  }
+
+  .circular-progress-number {
+    font-size: 2rem;
+  }
+
+  .ats-scores-sub-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .ats-sub-score-card {
+    padding: 14px;
+  }
+
+  .ats-sub-score-value {
+    font-size: 1.25rem;
+  }
+
+  .ats-sections-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ats-charts-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ats-card {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .ats-card-title {
+    font-size: 0.95rem;
+    margin-bottom: 14px;
+  }
+
+  .svg-chart-container {
+    padding: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .svg-chart-container svg {
+    min-width: 280px;
+  }
+
+  .suggestion-item {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .industry-match-name {
+    width: 100px;
+    font-size: 0.75rem;
+  }
+
+  .strengths-weaknesses-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .missing-skills-grid {
+    gap: 6px;
+  }
+
+  .missing-skill-tag {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ats-scores-sub-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
