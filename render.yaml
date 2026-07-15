@@ -1,0 +1,27 @@
+databases:
+  - name: talent-iq-db
+    databaseName: talent_iq
+    user: talent_iq_user
+    plan: free
+
+services:
+  - type: web
+    name: talent-iq-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    preDeployCommand: "python manage.py migrate"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: talent-iq-db
+          property: connectionString
+      - key: DB_ENGINE
+        value: postgresql
+      - key: SECRET_KEY
+        generate: true
+      - key: DEBUG
+        value: "False"
+      - key: GEMINI_API_KEY
+        sync: false
