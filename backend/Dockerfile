@@ -24,6 +24,9 @@ RUN python -m spacy download en_core_web_sm || true
 # Copy backend files
 COPY . /app/
 
+# Fix Windows line endings and make entrypoint executable
+RUN sed -i 's/\r$//' /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+
 # Compile static files for production WhiteNoise serving
 RUN python manage.py collectstatic --noinput
 
@@ -36,5 +39,5 @@ USER django-user
 # Port expose
 EXPOSE 8000
 
-# Default entrypoint (will be overridden in docker-compose if needed)
-CMD ["gunicorn", "--config", "gunicorn.conf.py", "config.wsgi:application"]
+# Default entrypoint script
+CMD ["/app/entrypoint.sh"]
