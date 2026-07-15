@@ -11,7 +11,7 @@ services:
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     plan: free
-    preDeployCommand: "python manage.py migrate"
+    dockerCommand: /bin/sh -c "python manage.py migrate && gunicorn --config gunicorn.conf.py config.wsgi:application"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -24,4 +24,4 @@ services:
       - key: DEBUG
         value: "False"
       - key: GEMINI_API_KEY
-        value: ""
+        sync: false
