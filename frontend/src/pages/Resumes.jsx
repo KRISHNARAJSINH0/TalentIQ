@@ -362,12 +362,150 @@ const Resumes = () => {
               </p>
             </div>
           ) : (
-            <GlassTable headers={['Version', 'Document Details', 'Size', 'Status', 'Actions']}>
+            <>
+            <div className="resume-desktop-table">
+              <GlassTable headers={['Version', 'Document Details', 'Size', 'Status', 'Actions']}>
+                {resumes.map((resume) => (
+                  <tr key={resume.id} onClick={() => navigate(`/resumes/${resume.id}`)} style={{ cursor: 'pointer' }}>
+                    <td>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        fontFamily: 'var(--font-number)',
+                        color: 'var(--primary)',
+                        background: 'rgba(37, 99, 235, 0.08)',
+                        padding: '2px 8px',
+                        borderRadius: '6px'
+                      }}>
+                        v{resume.version}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600, color: 'var(--text-color)', fontSize: '0.9rem', marginBottom: '2px' }}>
+                        {resume.resume_title || 'Untitled Resume'}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--subtext-color)' }}>
+                        Uploaded {formatDate(resume.upload_date)}
+                      </div>
+                    </td>
+                    <td style={{ fontSize: '0.85rem', fontFamily: 'var(--font-number)' }}>
+                      {formatBytes(resume.file_size)}
+                    </td>
+                    <td>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        whiteSpace: 'nowrap',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        lineHeight: '1.2',
+                        color: resume.is_active ? 'var(--success)' : 'var(--subtext-color)',
+                        background: resume.is_active ? 'rgba(34, 197, 94, 0.08)' : 'rgba(255,255,255,0.02)',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        border: resume.is_active ? '1px solid rgba(34, 197, 94, 0.2)' : '1px solid var(--glass-border)'
+                      }}>
+                        {resume.is_active ? 'Active Master' : 'Draft'}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
+                        <Link to={`/resumes/${resume.id}`} className="glass-panel" style={{
+                          padding: '6px',
+                          borderRadius: '8px',
+                          color: 'var(--text-color)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          textDecoration: 'none'
+                        }} title="View Pipeline Details">
+                          <HiOutlineEye size={16} />
+                        </Link>
+                        
+                        <button
+                          className="glass-panel"
+                          onClick={() => handleDownload(resume.id, resume.original_filename)}
+                          style={{
+                            padding: '6px',
+                            borderRadius: '8px',
+                            color: 'var(--text-color)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: 'none',
+                            cursor: 'pointer'
+                          }}
+                          title="Download Document"
+                        >
+                          <HiOutlineArrowDownTray size={16} />
+                        </button>
+
+                        {!resume.is_active && (
+                          <button
+                            className="glass-panel"
+                            onClick={(e) => handleActivate(e, resume.id)}
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '8px',
+                              color: 'var(--success)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              border: 'none',
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              cursor: 'pointer'
+                            }}
+                            title="Activate Version"
+                          >
+                            Activate
+                          </button>
+                        )}
+
+                        <button
+                          className="glass-panel"
+                          onClick={(e) => handleDelete(e, resume.id)}
+                          style={{
+                            padding: '6px',
+                            borderRadius: '8px',
+                            color: 'var(--danger)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: 'none',
+                            cursor: 'pointer'
+                          }}
+                          title="Delete Draft"
+                        >
+                          <HiOutlineTrash size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </GlassTable>
+            </div>
+
+            <div className="resume-mobile-cards">
               {resumes.map((resume) => (
-                <tr key={resume.id} onClick={() => navigate(`/resumes/${resume.id}`)} style={{ cursor: 'pointer' }}>
-                  <td>
+                <div
+                  key={resume.id}
+                  className="glass-panel"
+                  onClick={() => navigate(`/resumes/${resume.id}`)}
+                  style={{
+                    padding: '14px',
+                    borderRadius: '14px',
+                    marginBottom: '10px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '10px',
+                  }}
+                >
+                  {/* Top Row: Version badge + Status badge */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{
-                      fontSize: '0.75rem',
+                      fontSize: '0.7rem',
                       fontWeight: 700,
                       fontFamily: 'var(--font-number)',
                       color: 'var(--primary)',
@@ -377,111 +515,89 @@ const Resumes = () => {
                     }}>
                       v{resume.version}
                     </span>
-                  </td>
-                  <td>
-                    <div style={{ fontWeight: 600, color: 'var(--text-color)', fontSize: '0.9rem', marginBottom: '2px' }}>
-                      {resume.resume_title || 'Untitled Resume'}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--subtext-color)' }}>
-                      Uploaded {formatDate(resume.upload_date)}
-                    </div>
-                  </td>
-                  <td style={{ fontSize: '0.85rem', fontFamily: 'var(--font-number)' }}>
-                    {formatBytes(resume.file_size)}
-                  </td>
-                  <td>
                     <span style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      whiteSpace: 'nowrap',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      lineHeight: '1.2',
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
                       color: resume.is_active ? 'var(--success)' : 'var(--subtext-color)',
                       background: resume.is_active ? 'rgba(34, 197, 94, 0.08)' : 'rgba(255,255,255,0.02)',
-                      padding: '4px 10px',
+                      padding: '3px 8px',
                       borderRadius: '6px',
                       border: resume.is_active ? '1px solid rgba(34, 197, 94, 0.2)' : '1px solid var(--glass-border)'
                     }}>
-                      {resume.is_active ? 'Active Master' : 'Draft'}
+                      {resume.is_active ? '● Active Master' : 'Draft'}
                     </span>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
-                      <Link to={`/resumes/${resume.id}`} className="glass-panel" style={{
-                        padding: '6px',
+                  </div>
+
+                  {/* Middle Row: Title + Meta */}
+                  <div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-color)', fontSize: '0.88rem' }}>
+                      {resume.resume_title || 'Untitled Resume'}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--subtext-color)', marginTop: '2px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                      <span>Uploaded {formatDate(resume.upload_date)}</span>
+                      <span>{formatBytes(resume.file_size)}</span>
+                    </div>
+                  </div>
+
+                  {/* Bottom Row: Actions */}
+                  <div style={{ display: 'flex', gap: '6px', borderTop: '1px solid var(--glass-border)', paddingTop: '8px' }} onClick={(e) => e.stopPropagation()}>
+                    <Link to={`/resumes/${resume.id}`} className="glass-panel" style={{
+                      padding: '5px 10px',
+                      borderRadius: '8px',
+                      color: 'var(--text-color)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      textDecoration: 'none',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                    }}>
+                      <HiOutlineEye size={14} /> View
+                    </Link>
+                    
+                    <button
+                      className="glass-panel"
+                      onClick={() => handleDownload(resume.id, resume.original_filename)}
+                      style={{
+                        padding: '5px 10px',
                         borderRadius: '8px',
                         color: 'var(--text-color)',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        textDecoration: 'none'
-                      }} title="View Pipeline Details">
-                        <HiOutlineEye size={16} />
-                      </Link>
-                      
-                      <button
-                        className="glass-panel"
-                        onClick={() => handleDownload(resume.id, resume.original_filename)}
-                        style={{
-                          padding: '6px',
-                          borderRadius: '8px',
-                          color: 'var(--text-color)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          border: 'none',
-                          cursor: 'pointer'
-                        }}
-                        title="Download Document"
-                      >
-                        <HiOutlineArrowDownTray size={16} />
-                      </button>
+                        gap: '4px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                      }}
+                    >
+                      <HiOutlineArrowDownTray size={14} /> Download
+                    </button>
 
-                      {!resume.is_active && (
-                        <button
-                          className="glass-panel"
-                          onClick={(e) => handleActivate(e, resume.id)}
-                          style={{
-                            padding: '4px 10px',
-                            borderRadius: '8px',
-                            color: 'var(--success)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            border: 'none',
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                            cursor: 'pointer'
-                          }}
-                          title="Activate Version"
-                        >
-                          Activate
-                        </button>
-                      )}
-
-                      <button
-                        className="glass-panel"
-                        onClick={(e) => handleDelete(e, resume.id)}
-                        style={{
-                          padding: '6px',
-                          borderRadius: '8px',
-                          color: 'var(--danger)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          border: 'none',
-                          cursor: 'pointer'
-                        }}
-                        title="Delete Draft"
-                      >
-                        <HiOutlineTrash size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                    <button
+                      className="glass-panel"
+                      onClick={(e) => handleDelete(e, resume.id)}
+                      style={{
+                        padding: '5px 10px',
+                        borderRadius: '8px',
+                        color: 'var(--danger)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        marginLeft: 'auto',
+                      }}
+                    >
+                      <HiOutlineTrash size={14} />
+                    </button>
+                  </div>
+                </div>
               ))}
-            </GlassTable>
+            </div>
+            </>
           )}
         </GlassCard>
       </div>

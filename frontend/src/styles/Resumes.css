@@ -454,7 +454,25 @@
   100% { opacity: 0.5; }
 }
 
+/* Desktop table visible by default, mobile cards hidden */
+.resume-desktop-table {
+  display: block;
+}
+
+.resume-mobile-cards {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  /* Swap: hide table, show cards */
+  .resume-desktop-table {
+    display: none !important;
+  }
+
+  .resume-mobile-cards {
+    display: block !important;
+  }
+
   .resumes-page {
     padding: 12px 8px 120px;
   }
