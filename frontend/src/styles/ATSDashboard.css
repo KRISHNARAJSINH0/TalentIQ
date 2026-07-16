@@ -505,3 +505,70 @@
   }
 }
 
+/* =============================================
+   Print-specific Styling
+   ============================================= */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  .ats-dashboard-page {
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .ats-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    color: #000000 !important;
+  }
+
+  .ats-card-title {
+    color: #000000 !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+  }
+
+  .ats-overall-score-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    color: #000000 !important;
+  }
+
+  .circular-progress-number,
+  .circular-progress-label {
+    color: #000000 !important;
+  }
+
+  .suggestion-item {
+    background: #f8fafc !important;
+    border-left: 4px solid #cbd5e1 !important;
+    color: #000000 !important;
+    page-break-inside: avoid;
+  }
+
+  .suggestion-text {
+    color: #334155 !important;
+  }
+
+  .svg-radar-grid,
+  .svg-radar-axis {
+    stroke: #cbd5e1 !important;
+  }
+
+  .svg-radar-polygon {
+    fill: rgba(59, 130, 246, 0.1) !important;
+    stroke: #2563eb !important;
+  }
+}
+
+

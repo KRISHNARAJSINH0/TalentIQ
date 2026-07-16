@@ -176,3 +176,47 @@ class ATSEngineTests(APITestCase):
         response = self.client.get(self.history_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
+
+    def test_job_match_mode(self):
+        """Test ATS Intelligence Engine in Job-Specific match mode."""
+        self.client.force_authenticate(user=self.user1)
+        url = reverse("ats:ats-job-match")
+        data = {
+            "resume_id": str(self.resume1.id),
+            "job_description": "We are looking for a Python developer with Django and Redis experience. 3+ years required."
+        }
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn("overall_score", response.data)
+        self.assertIn("metadata", response.data)
+        self.assertIn("job_specific_results", response.data["metadata"])
+        self.assertGreater(response.data["metadata"]["job_specific_results"]["job_match"], 0)
+
+    def test_report_detail(self):
+        """Test retrieving a specific ATS report with benchmark data."""
+        self.client.force_authenticate(user=self.user1)
+        # Create a report first
+        res = self.client.post(self.analyze_url, {"resume_id": str(self.resume1.id)}, format="json")
+        report_id = res.data["id"]
+
+        url = reverse("ats:ats-report-detail", kwargs={"id": report_id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["id"], report_id)
+        self.assertIn("benchmark_comparison", response.data)
+        self.assertEqual(response.data["benchmark_comparison"]["profession"], "Software Engineer")
+
+    def test_weight_engine(self):
+        """Test that weight engine returns valid normalized weights for supported professions."""
+        from apps.ats.weight_engine import WeightEngine
+        weights_se = WeightEngine.get_weights("Software Engineer")
+        weights_doctor = WeightEngine.get_weights("Doctor")
+
+        # Sum of weights should be exactly 1.0
+        self.assertAlmostEqual(sum(weights_se.values()), 1.0)
+        self.assertAlmostEqual(sum(weights_doctor.values()), 1.0)
+
+        # Software Engineer weights should favor projects and github more than Doctor
+        self.assertGreater(weights_se["github"], weights_doctor.get("github", 0.0))
+        self.assertGreater(weights_doctor["experience"], weights_se["experience"])
+

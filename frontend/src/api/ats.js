@@ -21,4 +21,43 @@ export const atsAPI = {
   getATSHistory: () => {
     return axiosInstance.get('/ats/history/');
   },
+
+  /**
+   * Get specific ATS report by ID
+   */
+  getReportDetails: (reportId) => {
+    return axiosInstance.get(`/ats/report/${reportId}/`);
+  },
+
+  /**
+   * Run job description matching
+   */
+  matchJob: (resumeId, jobDescription) => {
+    return axiosInstance.post('/ats/job-match/', {
+      resume_id: resumeId,
+      job_description: jobDescription
+    });
+  },
+
+  /**
+   * Get all ATS rules
+   */
+  getRules: () => {
+    return axiosInstance.get('/ats/rules/');
+  },
+
+  /**
+   * Update specific ATS rule configuration (points/enabled state)
+   */
+  updateRule: (ruleId, data) => {
+    return axiosInstance.put(`/ats/rules/${ruleId}/`, data);
+  },
+
+  /**
+   * Get rule execution logs for a resume
+   */
+  getRuleExecutions: (resumeId) => {
+    return axiosInstance.get('/ats/execution/', { params: { resume_id: resumeId } });
+  }
 };
+
