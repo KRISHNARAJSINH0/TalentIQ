@@ -23,20 +23,20 @@ const GlassNavbar = ({ setIsMobileOpen }) => {
 
   return (
     <header
-      className="glass-panel"
+      className="glass-panel glass-topbar"
       style={{
         position: 'sticky',
-        top: '20px',
-        left: '20px',
-        right: '20px',
-        height: '72px',
+        top: '12px',
+        left: '12px',
+        right: '12px',
+        height: '60px',
         zIndex: 999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 24px',
-        borderRadius: '20px',
-        marginBottom: '24px',
+        padding: '0 16px',
+        borderRadius: '16px',
+        marginBottom: '16px',
         backgroundColor: 'var(--glass-bg)',
         backdropFilter: 'blur(20px)',
         border: '1px solid var(--glass-border)',
@@ -96,7 +96,7 @@ const GlassNavbar = ({ setIsMobileOpen }) => {
       </div>
 
       {/* Right section: Theme Toggle, Notifications, User Profile */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '18px', minWidth: '120px', justifyContent: 'flex-end' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'flex-end' }}>
         {/* Theme Switcher */}
         <ThemeSwitcher />
 
@@ -124,13 +124,13 @@ const GlassNavbar = ({ setIsMobileOpen }) => {
               <img
                 src={user.profile.avatar}
                 alt="Profile"
-                style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }}
+                style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary)' }}
               />
             ) : (
               <div
                 style={{
-                  width: '40px',
-                  height: '40px',
+                  width: '34px',
+                  height: '34px',
                   borderRadius: '50%',
                   background: 'var(--gradient-primary)',
                   color: '#FFFFFF',
@@ -281,6 +281,21 @@ const GlassNavbar = ({ setIsMobileOpen }) => {
           padding: 2px 6px;
           font-size: 0.7rem;
           font-weight: bold;
+        }
+
+        /* Mobile topbar adjustments */
+        @media (max-width: 768px) {
+          .glass-topbar {
+            height: 52px !important;
+            padding: 0 12px !important;
+            top: 8px !important;
+            margin-bottom: 8px !important;
+            border-radius: 14px !important;
+          }
+          .glass-bell-wrapper .bell-container {
+            width: 34px;
+            height: 34px;
+          }
         }
       `}</style>
     </header>

@@ -167,14 +167,59 @@
 
 @media (max-width: 768px) {
   .dashboard-page {
-    padding: 90px 16px 40px;
+    padding: 60px 8px 40px;
+  }
+
+  .dash-welcome {
+    margin-bottom: 20px;
   }
 
   .dash-welcome-title {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
+    margin-bottom: 4px;
+  }
+
+  .dash-welcome-sub {
+    font-size: 0.85rem;
+  }
+
+  .dash-card {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .dash-section-title {
+    font-size: 0.95rem;
+    margin-bottom: 12px;
   }
 
   .dash-actions-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .dash-action-card {
+    padding: 16px 12px;
+    gap: 8px;
+  }
+
+  .dash-action-icon {
+    font-size: 1.35rem;
+  }
+
+  .dash-action-label {
+    font-size: 0.78rem;
   }
 }
+
+@media (max-width: 480px) {
+  .dashboard-page {
+    padding: 56px 6px 40px;
+  }
+
+  .dash-actions-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+}
+

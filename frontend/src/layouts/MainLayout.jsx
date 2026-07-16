@@ -65,20 +65,20 @@ const MainLayout = () => {
         {/* Mobile Bottom Navigation Bar */}
         <div className="hide-on-desktop glass-panel" style={{
           position: 'fixed',
-          bottom: '12px',
-          left: '12px',
-          right: '12px',
-          height: '64px',
+          bottom: '8px',
+          left: '8px',
+          right: '8px',
+          height: '58px',
           zIndex: 1000,
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
-          borderRadius: '18px',
+          borderRadius: '16px',
           backgroundColor: 'var(--glass-bg)',
           backdropFilter: 'blur(20px)',
           border: '1px solid var(--glass-border)',
-          padding: '0 8px',
-          boxShadow: '0 8px 32px var(--glass-shadow)',
+          padding: '0 4px',
+          boxShadow: '0 -4px 24px var(--glass-shadow)',
         }}>
           <NavLink to="/dashboard" end style={({ isActive }) => ({
             color: isActive ? 'var(--primary)' : 'var(--text-color)',

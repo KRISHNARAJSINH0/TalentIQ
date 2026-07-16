@@ -159,3 +159,30 @@ html.dark .glass-btn-secondary:hover {
 .glass-table tr:hover td {
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* ===== Glass Components – Mobile ===== */
+@media (max-width: 768px) {
+  .glass-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .glass-table th {
+    padding: 10px 12px;
+    font-size: 0.75rem;
+  }
+
+  .glass-table td {
+    padding: 10px 12px;
+    font-size: 0.82rem;
+  }
+
+  .glass-btn-primary,
+  .glass-btn-secondary,
+  .glass-btn-danger {
+    height: 42px;
+    padding: 0 16px;
+    font-size: 0.85rem;
+  }
+}
+
