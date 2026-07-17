@@ -17,5 +17,10 @@ urlpatterns = [
     path("rules/import-export/", views.ATSRuleImportExportView.as_view(), name="ats-rules-import-export"),
     path("evaluate/", views.ATSEvaluateView.as_view(), name="ats-evaluate"),
     path("execution/", views.ATSRuleExecutionView.as_view(), name="ats-execution"),
+    # Profession Profile Engine endpoints
+    path("profiles/", views.ProfessionProfileListView.as_view(), name="ats-profiles-list"),
+    path("profiles/seed/", views.ProfessionProfileSeedView.as_view(), name="ats-profiles-seed"),
+    path("profile/<str:role>/", views.ProfessionProfileDetailView.as_view(), name="ats-profile-detail"),
+    path("profile/", views.ProfessionProfileDetailView.as_view(), name="ats-profile-create"),
     path("<uuid:resume_id>/", views.ATSDetailView.as_view(), name="ats-detail"),
 ]

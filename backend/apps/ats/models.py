@@ -283,3 +283,77 @@ class RuleExecution(BaseModel):
         return f"Execution of {self.rule.rule_code} on {self.resume.resume_title}: {self.status}"
 
 
+class ProfessionProfile(BaseModel):
+    """
+    Profile defining required/recommended settings, skills, expectations and weights
+    for a specific profession/role.
+    """
+    role = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name="Role / Profession"
+    )
+    industry = models.CharField(
+        max_length=100,
+        verbose_name="Industry"
+    )
+    required_sections = models.JSONField(
+        default=list,
+        verbose_name="Required Sections"
+    )
+    optional_sections = models.JSONField(
+        default=list,
+        verbose_name="Optional Sections"
+    )
+    required_skills = models.JSONField(
+        default=list,
+        verbose_name="Required Skills"
+    )
+    recommended_skills = models.JSONField(
+        default=list,
+        verbose_name="Recommended Skills"
+    )
+    soft_skills = models.JSONField(
+        default=list,
+        verbose_name="Soft Skills"
+    )
+    preferred_certifications = models.JSONField(
+        default=list,
+        verbose_name="Preferred Certifications"
+    )
+    expected_projects = models.JSONField(
+        default=list,
+        verbose_name="Expected Projects"
+    )
+    weights = models.JSONField(
+        default=dict,
+        verbose_name="Weight Distribution"
+    )
+    penalties = models.JSONField(
+        default=list,
+        verbose_name="Penalty Rules"
+    )
+    bonuses = models.JSONField(
+        default=list,
+        verbose_name="Bonus Rules"
+    )
+    benchmark_group = models.CharField(
+        max_length=100,
+        default="General",
+        verbose_name="Benchmark Group"
+    )
+    enabled = models.BooleanField(
+        default=True,
+        verbose_name="Enabled"
+    )
+
+    class Meta(BaseModel.Meta):
+        verbose_name = "Profession Profile"
+        verbose_name_plural = "Profession Profiles"
+        ordering = ["role"]
+
+    def __str__(self):
+        return self.role
+
+
+

@@ -19,7 +19,8 @@ from .models import (
     ATSBenchmark,
     RuleCategory,
     ATSRule,
-    RuleExecution
+    RuleExecution,
+    ProfessionProfile
 )
 from .serializers import (
     ATSScoreSerializer,
@@ -27,12 +28,14 @@ from .serializers import (
     ATSHistorySerializer,
     ATSRuleSerializer,
     RuleCategorySerializer,
-    RuleExecutionSerializer
+    RuleExecutionSerializer,
+    ProfessionProfileSerializer
 )
 from .rule_executor import RuleExecutor
 from .rule_reporter import RuleReporter
 from .rule_loader import RuleLoader
 from .rule_validator import RuleValidator
+from .profile_loader import ProfileLoader
 
 logger = logging.getLogger(__name__)
 
@@ -500,3 +503,110 @@ class ATSRuleImportExportView(APIView):
             return Response({"message": f"Successfully imported {count} rules."}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": f"Import failed: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProfessionProfileListView(APIView):
+    """
+    GET /api/ats/profiles/
+    Returns list of all profession profiles.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        # Ensure profiles are seeded
+        if ProfessionProfile.objects.count() == 0:
+            ProfileLoader.seed_profiles()
+
+        profiles = ProfessionProfile.objects.all()
+        industry = request.query_params.get("industry")
+        enabled_only = request.query_params.get("enabled")
+
+        if industry:
+            profiles = profiles.filter(industry__iexact=industry)
+        if enabled_only and enabled_only.lower() == "true":
+            profiles = profiles.filter(enabled=True)
+
+        serializer = ProfessionProfileSerializer(profiles, many=True)
+        return Response(serializer.data)
+
+
+class ProfessionProfileDetailView(APIView):
+    """
+    GET /api/ats/profile/{role}/
+    POST /api/ats/profile/
+    PUT /api/ats/profile/{role}/
+    DELETE /api/ats/profile/{role}/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, role=None):
+        if not role:
+            return Response({"error": "Role name is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Ensure profiles are seeded
+        if ProfessionProfile.objects.count() == 0:
+            ProfileLoader.seed_profiles()
+
+        profile = ProfessionProfile.objects.filter(role__iexact=role).first()
+        if not profile:
+            return Response({"error": f"Profile for role '{role}' not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ProfessionProfileSerializer(profile)
+        return Response(serializer.data)
+
+    def post(self, request, role=None):
+        """Create a new profession profile."""
+        serializer = ProfessionProfileSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, role=None):
+        """Update an existing profession profile."""
+        if not role:
+            return Response({"error": "Role name is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        profile = ProfessionProfile.objects.filter(role__iexact=role).first()
+        if not profile:
+            return Response({"error": f"Profile for role '{role}' not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        data = request.data
+        for field in ["industry", "required_sections", "optional_sections", "required_skills",
+                      "recommended_skills", "soft_skills", "preferred_certifications",
+                      "expected_projects", "weights", "penalties", "bonuses",
+                      "benchmark_group", "enabled"]:
+            if field in data:
+                setattr(profile, field, data[field])
+
+        profile.save()
+        serializer = ProfessionProfileSerializer(profile)
+        return Response(serializer.data)
+
+    def delete(self, request, role=None):
+        """Delete a profession profile."""
+        if not role:
+            return Response({"error": "Role name is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        profile = ProfessionProfile.objects.filter(role__iexact=role).first()
+        if not profile:
+            return Response({"error": f"Profile for role '{role}' not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        profile.delete()
+        return Response({"message": f"Profile '{role}' deleted."}, status=status.HTTP_204_NO_CONTENT)
+
+
+class ProfessionProfileSeedView(APIView):
+    """
+    POST /api/ats/profiles/seed/
+    Seeds or reseeds all default profession profiles.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        overwrite = request.data.get("overwrite", False)
+        count = ProfileLoader.seed_profiles(overwrite=bool(overwrite))
+        return Response({
+            "message": f"Successfully seeded {count} profession profiles.",
+            "total_profiles": ProfessionProfile.objects.count()
+        })

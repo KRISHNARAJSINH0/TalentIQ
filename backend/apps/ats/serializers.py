@@ -12,7 +12,8 @@ from .models import (
     ATSHistory,
     RuleCategory,
     ATSRule,
-    RuleExecution
+    RuleExecution,
+    ProfessionProfile
 )
 
 
@@ -142,3 +143,29 @@ class ATSHistorySerializer(serializers.ModelSerializer):
             "report_details",
             "completed_at",
         ]
+
+
+class ProfessionProfileSerializer(serializers.ModelSerializer):
+    """Serializer for ProfessionProfile model."""
+    class Meta:
+        model = ProfessionProfile
+        fields = [
+            "id",
+            "role",
+            "industry",
+            "required_sections",
+            "optional_sections",
+            "required_skills",
+            "recommended_skills",
+            "soft_skills",
+            "preferred_certifications",
+            "expected_projects",
+            "weights",
+            "penalties",
+            "bonuses",
+            "benchmark_group",
+            "enabled",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "created_at", "updated_at"]

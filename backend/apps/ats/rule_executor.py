@@ -17,6 +17,8 @@ from .models import RuleCategory, ATSRule, RuleExecution
 from .rule_loader import RuleLoader
 from .rule_registry import REGISTERED_HELPERS
 from .profession_engine import ProfessionEngine
+from .profile_registry import ProfileRegistry
+from .weight_manager import WeightManager
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +70,10 @@ class RuleExecutor:
         }
         profession = ProfessionEngine.detect_profession(profile_data_dict)
 
+        # 3b. Load Profession Profile from registry
+        profession_profile = ProfileRegistry.get_profile(profession)
+        logger.info(f"Loaded ProfessionProfile: {profession_profile.role} (industry: {profession_profile.industry})")
+
         # 4. Invoke background analysis services to get grammar, formatting, keywords and consistency metrics
         from .keyword_engine import KeywordEngine
         from .grammar_engine import GrammarEngine
@@ -103,7 +109,8 @@ class RuleExecutor:
             "keyword_results": keyword_results,
             "consistency_results": consistency_res,
             "profession": profession,
-            "job_description": job_description
+            "job_description": job_description,
+            "profession_profile": profession_profile
         }
 
         # 6. Load enabled rules matching target profession or 'All'
@@ -169,16 +176,46 @@ class RuleExecutor:
                     "points": r.points
                 })
 
-        # 8. Calculate Category Subscores
+        # 8. Apply Profession Profile skill checks
+        profile_penalties = 0
+        profile_bonuses = 0
+        missing_required = []
+        missing_recommended = []
+        skills_lower = [s.skill_name.lower() for s in skills]
+
+        for req_skill in profession_profile.required_skills:
+            if req_skill.lower() not in skills_lower:
+                missing_required.append(req_skill)
+                profile_penalties += 3  # 3-point penalty per missing required skill
+
+        for rec_skill in profession_profile.recommended_skills:
+            if rec_skill.lower() not in skills_lower:
+                missing_recommended.append(rec_skill)
+                profile_penalties += 1  # 1-point penalty per missing recommended skill
+
+        # Apply profile-level penalty/bonus rules
+        for penalty_rule in profession_profile.penalties:
+            try:
+                if not eval(penalty_rule.get("condition", "False"), REGISTERED_HELPERS, ctx):
+                    profile_penalties += penalty_rule.get("deduction", 0)
+            except Exception:
+                pass
+
+        for bonus_rule in profession_profile.bonuses:
+            try:
+                if eval(bonus_rule.get("condition", "False"), REGISTERED_HELPERS, ctx):
+                    profile_bonuses += bonus_rule.get("bonus", 0)
+            except Exception:
+                pass
+
+        # 9. Calculate Category Subscores
         categories = RuleCategory.objects.all()
         subscores = {}
-        category_weights = {}
 
         for cat in categories:
             cat_rules = [res for res in execution_results if res["category"] == cat.name]
             if not cat_rules:
-                subscores[cat.name.lower()] = 100.0  # default score for empty categories
-                category_weights[cat.name] = cat.weight
+                subscores[cat.name.lower()] = 100.0
                 continue
 
             positive_possible = sum(res["points"] for res in cat_rules if res["points"] > 0)
@@ -191,9 +228,11 @@ class RuleExecutor:
                 score = 100.0 - penalties_incurred
 
             subscores[cat.name.lower()] = max(0.0, min(100.0, score))
-            category_weights[cat.name] = cat.weight
 
-        # 9. Calculate Overall Score using Category Weights
+        # 10. Get profession-specific category weights from WeightManager
+        category_weights = WeightManager.get_category_weights(profession_profile.weights)
+
+        # 11. Calculate Overall Score using Profession-Specific Category Weights
         weighted_sum = 0.0
         total_weight = 0.0
         for cat_name, weight in category_weights.items():
@@ -201,6 +240,9 @@ class RuleExecutor:
             total_weight += weight
 
         overall_score = round(weighted_sum / total_weight) if total_weight > 0 else 70
+
+        # Apply profession profile penalties and bonuses
+        overall_score = max(0, min(100, overall_score - profile_penalties + profile_bonuses))
 
         # Adjust score if in Job-Specific match mode
         job_match_score = None
@@ -219,6 +261,16 @@ class RuleExecutor:
         return {
             "overall_score": overall_score,
             "profession": profession,
+            "profession_profile": {
+                "role": profession_profile.role,
+                "industry": profession_profile.industry,
+                "required_skills": profession_profile.required_skills,
+                "recommended_skills": profession_profile.recommended_skills,
+                "missing_required_skills": missing_required,
+                "missing_recommended_skills": missing_recommended,
+                "weights": profession_profile.weights,
+                "benchmark_group": profession_profile.benchmark_group
+            },
             "subscores": subscores,
             "rules_executed_count": len(applicable_rules),
             "passed_count": sum(1 for res in execution_results if res["status"] == "passed"),
@@ -226,5 +278,7 @@ class RuleExecutor:
             "skipped_count": sum(1 for res in execution_results if res["status"] == "skipped"),
             "execution_results": execution_results,
             "processing_time": processing_time,
-            "job_match_score": job_match_score
+            "job_match_score": job_match_score,
+            "profile_penalties": profile_penalties,
+            "profile_bonuses": profile_bonuses
         }
