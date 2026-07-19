@@ -13,11 +13,35 @@ from .models import (
     RuleCategory,
     ATSRule,
     RuleExecution,
-    ProfessionProfile
+    ProfessionProfile,
+    CategoryScore,
+    ExplanationReport,
+    RecommendationHistory,
+    ImprovementSimulation,
+    CalibrationReport,
+    ValidationRun,
+    RuleMetrics,
+    DistributionMetrics
 )
 
 
+class CategoryScoreSerializer(serializers.ModelSerializer):
+    """Serializer for CategoryScore model."""
+    class Meta:
+        model = CategoryScore
+        fields = [
+            "id",
+            "resume",
+            "category",
+            "score",
+            "confidence",
+            "created_at"
+        ]
+        read_only_fields = ["id", "created_at"]
+
+
 class ATSScoreSerializer(serializers.ModelSerializer):
+
     """Serializer for legacy ATSScore model compatibility."""
     resume_title = serializers.CharField(source="resume.resume_title", read_only=True)
 
@@ -169,3 +193,82 @@ class ProfessionProfileSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+
+class ExplanationReportSerializer(serializers.ModelSerializer):
+    """Serializer for ExplanationReport model."""
+    class Meta:
+        model = ExplanationReport
+        fields = [
+            "id",
+            "resume",
+            "overall_score",
+            "confidence",
+            "natural_language_report",
+            "category_explanations",
+            "ats_score_breakdown",
+            "created_at"
+        ]
+        read_only_fields = ["id", "created_at"]
+
+
+class RecommendationHistorySerializer(serializers.ModelSerializer):
+    """Serializer for RecommendationHistory model."""
+    class Meta:
+        model = RecommendationHistory
+        fields = [
+            "id",
+            "resume",
+            "category",
+            "recommendation_text",
+            "priority",
+            "score_impact",
+            "implemented",
+            "applied_at",
+            "created_at"
+        ]
+        read_only_fields = ["id", "created_at"]
+
+
+class ImprovementSimulationSerializer(serializers.ModelSerializer):
+    """Serializer for ImprovementSimulation model."""
+    class Meta:
+        model = ImprovementSimulation
+        fields = [
+            "id",
+            "resume",
+            "current_score",
+            "simulated_actions",
+            "estimated_score",
+            "created_at"
+        ]
+        read_only_fields = ["id", "created_at"]
+
+
+class CalibrationReportSerializer(serializers.ModelSerializer):
+    """Serializer for CalibrationReport model."""
+    class Meta:
+        model = CalibrationReport
+        fields = "__all__"
+
+
+class ValidationRunSerializer(serializers.ModelSerializer):
+    """Serializer for ValidationRun model."""
+    class Meta:
+        model = ValidationRun
+        fields = "__all__"
+
+
+class RuleMetricsSerializer(serializers.ModelSerializer):
+    """Serializer for RuleMetrics model."""
+    class Meta:
+        model = RuleMetrics
+        fields = "__all__"
+
+
+class DistributionMetricsSerializer(serializers.ModelSerializer):
+    """Serializer for DistributionMetrics model."""
+    class Meta:
+        model = DistributionMetrics
+        fields = "__all__"
+

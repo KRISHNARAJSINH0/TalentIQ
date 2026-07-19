@@ -72,6 +72,22 @@ class RuleReporter:
         if not weaknesses:
             weaknesses.append("No critical issues found. Maintain regular content updates.")
 
+        # Merge quality-based feedback
+        for s in execution_data.get("strengths", []):
+            if s not in strengths:
+                strengths.append(s)
+        for w in execution_data.get("weaknesses", []):
+            if w not in weaknesses:
+                weaknesses.append(w)
+        for r_text in execution_data.get("recommendations", []):
+            if not any(r["suggestion"] == r_text for r in recommendations):
+                recommendations.append({
+                    "category": "Quality Check",
+                    "suggestion": r_text,
+                    "priority": "important",
+                    "potential_boost": 5
+                })
+
         # Create standard return payload matching frontend expectations and specifications
         return {
             "overall_score": execution_data["overall_score"],
@@ -94,3 +110,4 @@ class RuleReporter:
                 } if execution_data.get("job_match_score") is not None else {}
             }
         }
+

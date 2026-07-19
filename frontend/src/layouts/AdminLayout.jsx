@@ -33,8 +33,10 @@ const AdminLayout = () => {
     { to: '/admin/analytics', label: 'Analytics', icon: <HiOutlineChartBar size={22} /> },
     { to: '/admin/reports', label: 'Reports', icon: <HiOutlineDocumentText size={22} /> },
     { to: '/admin/system', label: 'System Health', icon: <HiOutlineCpuChip size={22} /> },
+    { to: '/admin/ats-calibration', label: 'ATS Calibration', icon: <HiOutlineCpuChip size={22} /> },
     { to: '/admin/logs', label: 'Audit Trail', icon: <HiOutlineClipboardDocumentList size={22} /> },
   ];
+
 
   const sidebarVariants = {
     expanded: { width: '280px' },

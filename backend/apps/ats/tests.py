@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from apps.resumes.models import Resume
-from apps.profiles.models import Profile, Skill, Education, Experience
+from apps.profiles.models import Profile, Skill, Education, Experience, Project, Certification
 from .models import ATSScore, ProfessionProfile
 
 User = get_user_model()
@@ -143,7 +143,7 @@ class ATSEngineTests(APITestCase):
         response = self.client.get(detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(float(response.data["ats_score"]), float(ATSScore.objects.latest("ats_completed_at").ats_score))
+        self.assertEqual(int(response.data["ats_score"]), int(float(ATSScore.objects.latest("ats_completed_at").ats_score)))
 
     def test_detail_endpoint_not_found(self):
         """Test detail endpoint returns 404 when no analysis run has occurred."""
@@ -435,3 +435,457 @@ class ProfessionProfileEngineTests(APITestCase):
         score_record = ATSScore.objects.filter(resume=self.resume).first()
         self.assertIsNotNone(score_record)
         self.assertIn("overall_score", score_record.ats_json)
+
+    def test_category_list_endpoint(self):
+        """Test GET /api/ats/categories/ returns all 20 quality categories."""
+        self.client.force_authenticate(user=self.user)
+        url = reverse("ats:ats-categories-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("categories", response.data)
+        self.assertEqual(len(response.data["categories"]), 20)
+        self.assertIn("Contact Information", response.data["categories"])
+        self.assertIn("Soft Skills", response.data["categories"])
+
+    def test_category_score_detail_endpoint(self):
+        """Test POST /api/ats/category-score/ recalculates scores."""
+        self.client.force_authenticate(user=self.user)
+        # Recalculate all
+        url = reverse("ats:ats-category-score")
+        data = {"resume_id": str(self.resume.id)}
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertGreater(len(response.data), 0)
+        
+        # Recalculate specific
+        data = {"resume_id": str(self.resume.id), "category": "Contact Information"}
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["category"], "Contact Information")
+
+    def test_category_report_endpoint(self):
+        """Test GET /api/ats/category-report/ retrieves category scores."""
+        self.client.force_authenticate(user=self.user)
+        # First trigger analyze
+        reverse_analyze = reverse("ats:ats-analyze")
+        self.client.post(reverse_analyze, {"resume_id": str(self.resume.id)}, format="json")
+
+        url = reverse("ats:ats-category-report")
+        response = self.client.get(url, {"resume_id": str(self.resume.id)})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["resume_id"], self.resume.id)
+        self.assertIn("category_scores", response.data)
+        self.assertEqual(len(response.data["category_scores"]), 20)
+
+    def test_quality_score_differentiation(self):
+        """Verify that a high-quality resume/profile scores significantly better than a low-quality one."""
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        # 1. Create a Low-Quality Profile and Resume
+        user_low = User.objects.create_user(username="lowuser", email="poor_email_crazy_boy@example.com", password="password")
+        profile_low, _ = Profile.objects.get_or_create(user=user_low)
+        profile_low.headline = "Looking for job"
+        profile_low.summary = "I want a job. I have some skills."
+        profile_low.address = ""
+        profile_low.save()
+
+        resume_low = Resume.objects.create(
+            user=user_low,
+            resume_title="Low Resume",
+            extracted_text="I want a job",
+            extraction_status="completed"
+        )
+
+        # 2. Create an Excellent-Quality Profile and Resume
+        user_high = User.objects.create_user(username="highuser", email="john.doe@gmail.com", password="password", first_name="John", last_name="Doe")
+        profile_high, _ = Profile.objects.get_or_create(user=user_high)
+        profile_high.headline = "Senior Software Engineer | Python & Cloud Architecture"
+        profile_high.summary = "Result-oriented Senior Software Engineer with 8+ years of experience leading cross-functional teams to build high-scale cloud platforms."
+        profile_high.address = "San Francisco, CA"
+        profile_high.links = ["https://linkedin.com/in/johndoe", "https://github.com/johndoe", "https://johndoe.dev"]
+        profile_high.save()
+        # Add required skills
+        skill1 = Skill.objects.create(profile=profile_high, skill_name="Python")
+        skill2 = Skill.objects.create(profile=profile_high, skill_name="Django")
+        skill3 = Skill.objects.create(profile=profile_high, skill_name="AWS")
+        
+        # Add experiences with quantified achievements
+        Experience.objects.create(
+            profile=profile_high,
+            company="Tech Corp",
+            designation="Lead Developer",
+            description="Spearheaded the optimization of database queries, reducing latency by 45% and saving $12k in monthly infrastructure costs. Led a team of 5 engineers to deliver high-quality solutions.",
+            start_date=date(2020, 1, 1),
+            end_date=date(2023, 1, 1)
+        )
+        Project.objects.create(
+            profile=profile_high,
+            project_name="AI Agent Platform",
+            description="Designed and built a microservices-based API using FastAPI and Python, deployed on AWS ECS handling 50k requests daily. Source code available on github.com/johndoe/ai-agent.",
+            technologies="Python, FastAPI, AWS ECS, Docker",
+            github_url="https://github.com/johndoe/ai-agent",
+            live_url="https://ai-agent.johndoe.dev"
+        )
+        # Add education
+        Education.objects.create(
+            profile=profile_high,
+            institute="Stanford University",
+            degree="Bachelor of Science",
+            field_of_study="Computer Science",
+            grade="3.8/4.0",
+            start_date=date(2012, 9, 1),
+            end_date=date(2016, 6, 1)
+        )
+        Certification.objects.create(
+            profile=profile_high,
+            certificate_name="AWS Certified Solutions Architect",
+            organization="Amazon Web Services",
+            issue_date=date(2021, 5, 1)
+        )
+
+        resume_high = Resume.objects.create(
+            user=user_high,
+            resume_title="High Resume",
+            extracted_text="Senior Software Engineer Django Python AWS Solutions Architect",
+            extraction_status="completed"
+        )
+
+        # Run scoring for both
+        from .rule_executor import RuleExecutor
+        
+        low_res = RuleExecutor.execute_rules(profile_low, resume_low)
+        high_res = RuleExecutor.execute_rules(profile_high, resume_high)
+
+        # Assert score differences
+        self.assertGreater(high_res["overall_score"], low_res["overall_score"])
+        
+        # Specifically assert Category Score differences
+        # Contact Information: Low-quality has unprofessional email, no name, no links -> score should be low
+        # High-quality has valid professional details and LinkedIn/GitHub -> score should be high
+        low_contact_score = next(s["score"] for s in low_res["category_scores"] if s["category"] == "Contact Information")
+        high_contact_score = next(s["score"] for s in high_res["category_scores"] if s["category"] == "Contact Information")
+        self.assertGreater(high_contact_score, low_contact_score)
+
+        # Experience, Projects, GitHub, Portfolio
+        low_github_score = next(s["score"] for s in low_res["category_scores"] if s["category"] == "GitHub")
+        high_github_score = next(s["score"] for s in high_res["category_scores"] if s["category"] == "GitHub")
+        self.assertEqual(low_github_score, 0.0)
+        self.assertEqual(high_github_score, 100.0)
+
+
+class PenaltyBonusEngineTests(APITestCase):
+    """
+    Test suite for the Penalty & Bonus Intelligence Engine (Phase D).
+    """
+
+    def setUp(self):
+        # Create standard test user
+        self.user = User.objects.create_user(
+            username="candidate_adj",
+            email="candidate.adj@example.com",
+            password="Password123"
+        )
+        self.user.phone = "+15551234567"
+        self.user.save()
+        
+        # Profile is auto-created by signal, retrieve and update it
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.summary = "Experienced Software Engineer with a proven track record of designing scalable cloud APIs."
+        self.profile.github = "https://github.com/candidate-adj"
+        self.profile.linkedin = "https://linkedin.com/in/candidate-adj"
+        self.profile.portfolio_url = "https://candidate-adj.dev"
+        self.profile.save()
+
+        # Add some skills
+        Skill.objects.create(profile=self.profile, skill_name="Python", skill_type=Skill.SkillType.TECHNICAL)
+        Skill.objects.create(profile=self.profile, skill_name="Django", skill_type=Skill.SkillType.TECHNICAL)
+        Skill.objects.create(profile=self.profile, skill_name="Docker", skill_type=Skill.SkillType.TECHNICAL)
+
+        # Create resume
+        self.resume = Resume.objects.create(
+            user=self.user,
+            resume_title="Adjustment Resume",
+            extracted_text="Python Django Developer with Docker and AWS experience.",
+            extraction_status="completed"
+        )
+
+        self.client.force_authenticate(user=self.user)
+
+    def test_penalty_and_bonus_engines_direct(self):
+        """Test PenaltyEngine and BonusEngine directly for Software Engineer."""
+        from .penalty_engine import PenaltyEngine
+        from .bonus_engine import BonusEngine
+
+        # Calculate for our standard profile (which is relatively strong)
+        penalties_val, penalty_report = PenaltyEngine.calculate_penalties(self.profile, self.resume, "Software Engineer")
+        # Should have few penalties (no projects, no certifications, etc.)
+        self.assertLessEqual(penalties_val, 0)
+        
+        # Calculate bonuses
+        bonuses_val, bonus_report = BonusEngine.calculate_bonuses(self.profile, self.resume, "Software Engineer")
+        # Has Github, Linkedin, Portfolio, Docker, strong action verbs, strong summary -> bonus should be positive
+        self.assertGreater(bonuses_val, 0)
+
+    def test_adjustments_clamping(self):
+        """Test that penalties clamp to -30 and bonuses clamp to +20."""
+        from .penalty_engine import PenaltyEngine
+        from .bonus_engine import BonusEngine
+
+        # 1. Test extreme penalties (empty/missing details)
+        poor_user = User.objects.create_user(username="poor_adj", email="", password="Password123")
+        poor_profile = Profile.objects.get(user=poor_user)
+        poor_profile.summary = ""
+        poor_profile.save()
+        
+        poor_resume = Resume.objects.create(user=poor_user, resume_title="Poor", extracted_text="")
+        
+        penalties_val, penalty_report = PenaltyEngine.calculate_penalties(poor_profile, poor_resume, "Software Engineer")
+        # Total penalties should be very negative but clamped to -30
+        self.assertEqual(penalties_val, -30)
+
+        # 2. Test extreme bonuses (lots of bonus achievements)
+        # Add publication, volunteer, internship, projects, action verbs, etc.
+        from apps.profiles.models import Project, Education, Certification
+        
+        # Add project with live url
+        Project.objects.create(
+            profile=self.profile,
+            project_name="AI Agent Platform",
+            description="Designed and built a microservices-based API using Django and Docker, handling 50k requests daily. Deployed on AWS.",
+            technologies="Python, Django, AWS",
+            github_url="https://github.com/johndoe/ai-agent",
+            live_url="https://ai-agent.johndoe.dev"
+        )
+        # Add more skills to trigger Docker, AWS, Kubernetes, etc.
+        Skill.objects.create(profile=self.profile, skill_name="AWS", skill_type=Skill.SkillType.TECHNICAL)
+        Skill.objects.create(profile=self.profile, skill_name="Kubernetes", skill_type=Skill.SkillType.TECHNICAL)
+        
+        # Trigger Leadership (add leadership word: spearheaded, managed), Hackathon, Patent, Open Source
+        self.profile.summary = "Spearheaded development of open-source hackathon winning platforms. Patented cloud optimization algorithm."
+        self.profile.save()
+
+        bonuses_val, bonus_report = BonusEngine.calculate_bonuses(self.profile, self.resume, "Software Engineer")
+        # Total bonuses should be high but clamped to +20
+        self.assertEqual(bonuses_val, 20)
+
+    def test_adjustments_views_integration(self):
+        """Test POST /api/ats/adjustments/, GET /api/ats/penalties/ and GET /api/ats/bonuses/ endpoints."""
+        import json
+        
+        # 1. POST /api/ats/adjustments/
+        url_adj = "/api/ats/adjustments/"
+        data = {"resume_id": str(self.resume.id)}
+        response = self.client.post(url_adj, data, format="json")
+        self.assertEqual(response.status_code, 200)
+        res_data = response.json()
+        
+        self.assertIn("base_score", res_data)
+        self.assertIn("penalties", res_data)
+        self.assertIn("bonuses", res_data)
+        self.assertIn("final_score", res_data)
+        self.assertIn("penalty_report", res_data)
+        self.assertIn("bonus_report", res_data)
+
+        # 2. GET /api/ats/penalties/
+        url_penalties = f"/api/ats/penalties/?resume_id={self.resume.id}"
+        response_pen = self.client.get(url_penalties)
+        self.assertEqual(response_pen.status_code, 200)
+        pen_data = response_pen.json()
+        self.assertEqual(pen_data["resume_id"], str(self.resume.id))
+        self.assertIn("total_penalties", pen_data)
+        self.assertIn("penalty_report", pen_data)
+
+        # 3. GET /api/ats/bonuses/
+        url_bonuses = f"/api/ats/bonuses/?resume_id={self.resume.id}"
+        response_bon = self.client.get(url_bonuses)
+        self.assertEqual(response_bon.status_code, 200)
+        bon_data = response_bon.json()
+        self.assertEqual(bon_data["resume_id"], str(self.resume.id))
+        self.assertIn("total_bonuses", bon_data)
+        self.assertIn("bonus_report", bon_data)
+
+
+class ExplainableATSEngineTests(APITestCase):
+    """
+    Test suite for Phase G: Explainable ATS Intelligence.
+    """
+
+    def setUp(self):
+        # Create standard test user
+        self.user = User.objects.create_user(
+            username="candidate_explain",
+            email="candidate.explain@example.com",
+            password="Password123"
+        )
+        # Profile is auto-created by signal, retrieve and update it
+        self.profile = Profile.objects.get(user=self.user)
+        self.profile.summary = "Experienced Software Engineer with a proven track record of designing scalable cloud APIs."
+        self.profile.github = "https://github.com/candidate-explain"
+        self.profile.linkedin = "https://linkedin.com/in/candidate-explain"
+        self.profile.save()
+
+        # Add some skills
+        Skill.objects.create(profile=self.profile, skill_name="Python", skill_type=Skill.SkillType.TECHNICAL)
+        Skill.objects.create(profile=self.profile, skill_name="Django", skill_type=Skill.SkillType.TECHNICAL)
+
+        # Create resume
+        self.resume = Resume.objects.create(
+            user=self.user,
+            resume_title="Explainable Resume",
+            extracted_text="Python Django Developer.",
+            extraction_status="completed"
+        )
+
+        self.client.force_authenticate(user=self.user)
+
+    def test_explain_endpoint(self):
+        """Test POST /api/ats/explain/ creates and returns explanation report."""
+        url = "/api/ats/explain/"
+        data = {"resume_id": str(self.resume.id)}
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, 201)
+        res_data = response.json()
+        
+        self.assertEqual(res_data["resume"], str(self.resume.id))
+        self.assertIn("overall_score", res_data)
+        self.assertIn("natural_language_report", res_data)
+        self.assertIn("category_explanations", res_data)
+        self.assertIn("ats_score_breakdown", res_data)
+        
+        # Verify 7 core categories exist in explanation
+        core_cats = ["Contact Information", "Professional Summary", "Skills", "Projects", "Experience", "Education", "Achievements"]
+        for cat in core_cats:
+            self.assertIn(cat, res_data["category_explanations"])
+            self.assertIn("score", res_data["category_explanations"][cat])
+            self.assertIn("reason", res_data["category_explanations"][cat])
+            self.assertIn("evidence", res_data["category_explanations"][cat])
+            self.assertIn("impact", res_data["category_explanations"][cat])
+
+    def test_explanation_detail_endpoint(self):
+        """Test GET /api/ats/explanation/ returns explanation report."""
+        # Query detail first (should auto-generate)
+        url = f"/api/ats/explanation/?resume_id={self.resume.id}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        res_data = response.json()
+        self.assertEqual(res_data["resume"], str(self.resume.id))
+        
+        # Query again (should fetch from DB)
+        response2 = self.client.get(url)
+        self.assertEqual(response2.status_code, 200)
+        self.assertEqual(response2.json()["id"], res_data["id"])
+
+    def test_simulate_endpoint(self):
+        """Test POST /api/ats/simulate/ performs score simulations."""
+        url = "/api/ats/simulate/"
+        data = {
+            "resume_id": str(self.resume.id),
+            "actions": ["add_github", "quantify_experience"]
+        }
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, 200)
+        res_data = response.json()
+        
+        self.assertIn("simulation", res_data)
+        self.assertIn("score_boost", res_data)
+        self.assertIn("suggested_actions", res_data)
+        self.assertGreater(res_data["simulation"]["estimated_score"], res_data["simulation"]["current_score"])
+
+    def test_action_plan_endpoint(self):
+        """Test GET /api/ats/action-plan/ returns prioritized action items."""
+        url = f"/api/ats/action-plan/?resume_id={self.resume.id}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        res_data = response.json()
+        
+        self.assertEqual(res_data["resume_id"], str(self.resume.id))
+        self.assertIn("action_plan", res_data)
+        # Should have sorted recommendations
+        for item in res_data["action_plan"]:
+            self.assertIn("category", item)
+            self.assertIn("recommendation_text", item)
+            self.assertIn("priority", item)
+            self.assertIn("score_impact", item)
+
+
+class ATSCalibrationEngineTests(APITestCase):
+    """
+    Test suite for Phase H Calibration, Validation and statistical distribution APIs.
+    """
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="admin_calib_test@example.com",
+            email="admin_calib_test@example.com",
+            password="TestPassword123!",
+            is_staff=True
+        )
+        self.client.force_authenticate(user=self.user)
+
+    def test_validate_endpoint(self):
+        """Test POST /api/ats/validate/ runs validation sweep."""
+        url = "/api/ats/validate/"
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 200)
+        res_data = response.json()
+        self.assertIn("accuracy_rate", res_data)
+        self.assertIn("total_tests", res_data)
+        self.assertIn("successful_tests", res_data)
+
+    def test_calibrate_endpoint(self):
+        """Test POST /api/ats/calibrate/ runs full calibration and returns health stats."""
+        url = "/api/ats/calibrate/"
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 200)
+        res_data = response.json()
+        self.assertIn("engine_health", res_data)
+        self.assertIn("score_distribution", res_data)
+        self.assertIn("rule_coverage", res_data)
+        self.assertIn("validation_accuracy", res_data)
+
+    def test_health_endpoint(self):
+        """Test GET /api/ats/health/ returns latest runs and stats."""
+        # First execute calibration to populate DB
+        self.client.post("/api/ats/calibrate/")
+        
+        url = "/api/ats/health/"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        res_data = response.json()
+        self.assertIsNotNone(res_data["latest_calibration"])
+        self.assertIsNotNone(res_data["latest_validation"])
+        self.assertIn("rule_metrics", res_data)
+
+    def test_distribution_endpoint(self):
+        """Test GET /api/ats/distribution/ returns distribution statistcs."""
+        # First execute calibration to populate DB
+        self.client.post("/api/ats/calibrate/")
+
+        url = "/api/ats/distribution/"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        res_data = response.json()
+        self.assertIsNotNone(res_data["latest_distribution"])
+        self.assertIn("average_score", res_data["latest_distribution"])
+
+    def test_quality_endpoint(self):
+        """Test GET /api/ats/quality/ returns structured Engine Quality Report."""
+        # First execute calibration to populate DB
+        self.client.post("/api/ats/calibrate/")
+
+        url = "/api/ats/quality/"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        res_data = response.json()
+        self.assertIn("engine_health", res_data)
+        self.assertIn("score_distribution", res_data)
+        self.assertIn("rule_coverage", res_data)
+        self.assertIn("duplicate_rules", res_data)
+        self.assertIn("unused_rules", res_data)
+        self.assertIn("profession_accuracy", res_data)
+        self.assertIn("recommendations", res_data)
+
+
+
+

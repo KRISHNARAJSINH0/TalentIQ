@@ -342,6 +342,20 @@ const ATSDashboard = () => {
           </div>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             <button 
+              onClick={() => navigate(`/resumes/${resumeId}/explainable-ats`)} 
+              className="btn btn-primary btn-sm"
+              style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: '8px', 
+                background: 'linear-gradient(135deg, #EC4899 0%, #D946EF 100%)', 
+                borderColor: '#EC4899',
+                fontWeight: '600'
+              }}
+            >
+              🧠 Explainable ATS
+            </button>
+            <button 
               onClick={handlePrint}
               className="btn btn-outline-dark btn-sm"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
@@ -522,6 +536,116 @@ const ATSDashboard = () => {
               </div>
 
             </div>
+
+            {/* Phase D: Penalty & Bonus Adjustments Section */}
+            {metadata.adjustments ? (
+              <div className="ats-card score-adjustments-card" style={{ marginBottom: '24px' }}>
+                <h3 className="ats-card-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '12px' }}>
+                  <HiOutlineSparkles style={{ color: '#8B5CF6' }} /> Penalty & Bonus Score Adjustments
+                </h3>
+                <p style={{ fontSize: '0.8125rem', color: 'var(--gray-400)', marginBottom: '20px' }}>
+                  Professional ATS systems apply positive and negative scoring adjustments. Here is your resume's adjustments pipeline.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                  
+                  {/* Base Score */}
+                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '10px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--gray-400)', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.05em' }}>BASE QUALITY SCORE</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--white)', marginTop: '8px' }}>{metadata.adjustments.base_score}</div>
+                    <div style={{ fontSize: '0.6875rem', color: 'var(--gray-500)', marginTop: '4px' }}>Unadjusted score</div>
+                  </div>
+
+                  {/* Penalties */}
+                  <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '16px', borderRadius: '10px', border: '1px solid rgba(239, 68, 68, 0.2)', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#EF4444', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.05em' }}>PENALTIES DEDUCTED</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#EF4444', marginTop: '8px' }}>
+                      {metadata.adjustments.penalties > 0 ? `-${metadata.adjustments.penalties}` : metadata.adjustments.penalties}
+                    </div>
+                    <div style={{ fontSize: '0.6875rem', color: 'var(--gray-500)', marginTop: '4px' }}>Clamped max -30</div>
+                  </div>
+
+                  {/* Bonuses */}
+                  <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '16px', borderRadius: '10px', border: '1px solid rgba(16, 185, 129, 0.2)', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#10B981', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.05em' }}>BONUS REWARDS</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10B981', marginTop: '8px' }}>
+                      {metadata.adjustments.bonuses > 0 ? `+${metadata.adjustments.bonuses}` : metadata.adjustments.bonuses}
+                    </div>
+                    <div style={{ fontSize: '0.6875rem', color: 'var(--gray-500)', marginTop: '4px' }}>Clamped max +20</div>
+                  </div>
+
+                  {/* Final Score */}
+                  <div style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(139,92,246,0.2))', padding: '16px', borderRadius: '10px', border: '1px solid rgba(139,92,246,0.3)', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#a78bfa', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.05em' }}>FINAL ATS SCORE</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#a78bfa', marginTop: '8px' }}>{metadata.adjustments.final_score}</div>
+                    <div style={{ fontSize: '0.6875rem', color: 'var(--gray-500)', marginTop: '4px' }}>Clamped 0 - 100</div>
+                  </div>
+
+                </div>
+
+                {/* Detailed breakdowns */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }} className="adjustments-breakdown-grid">
+                  
+                  {/* Penalties List */}
+                  <div style={{ background: 'rgba(0,0,0,0.1)', padding: '16px', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                    <h4 style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#EF4444', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                      <HiOutlineExclamationCircle /> Active Penalties ({metadata.adjustments.penalty_report?.length || 0})
+                    </h4>
+                    {metadata.adjustments.penalty_report && metadata.adjustments.penalty_report.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto', paddingRight: '4px' }}>
+                        {metadata.adjustments.penalty_report.map((p, idx) => (
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(239, 68, 68, 0.03)', padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(239, 68, 68, 0.1)', fontSize: '0.8125rem' }}>
+                            <div>
+                              <strong style={{ color: 'var(--white)' }}>{p.name}</strong>
+                              <span style={{ fontSize: '0.6875rem', color: 'var(--gray-500)', marginLeft: '8px' }}>({p.category})</span>
+                            </div>
+                            <span style={{ color: '#EF4444', fontWeight: 'bold' }}>{p.points}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: '0.8125rem', color: 'var(--gray-500)' }}>Clean profile! No penalties applied.</p>
+                    )}
+                  </div>
+
+                  {/* Bonuses List */}
+                  <div style={{ background: 'rgba(0,0,0,0.1)', padding: '16px', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
+                    <h4 style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#10B981', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                      <HiOutlineCheckCircle /> Active Bonuses ({metadata.adjustments.bonus_report?.length || 0})
+                    </h4>
+                    {metadata.adjustments.bonus_report && metadata.adjustments.bonus_report.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto', paddingRight: '4px' }}>
+                        {metadata.adjustments.bonus_report.map((b, idx) => (
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(16, 185, 129, 0.03)', padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(16, 185, 129, 0.1)', fontSize: '0.8125rem' }}>
+                            <div>
+                              <strong style={{ color: 'var(--white)' }}>{b.name}</strong>
+                              <span style={{ fontSize: '0.6875rem', color: 'var(--gray-500)', marginLeft: '8px' }}>({b.category})</span>
+                            </div>
+                            <span style={{ color: '#10B981', fontWeight: 'bold' }}>+{b.points}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: '0.8125rem', color: 'var(--gray-500)' }}>No bonuses applied. Enhance your profile to get score boosts.</p>
+                    )}
+                  </div>
+
+                </div>
+              </div>
+            ) : (
+              <div className="ats-card" style={{ textAlign: 'center', padding: '24px', marginBottom: '24px', borderColor: 'var(--glass-border)' }}>
+                <p style={{ fontSize: '0.875rem', color: 'var(--gray-400)', marginBottom: '12px' }}>
+                  Penalty & Bonus adjustments are not computed yet for this resume.
+                </p>
+                <button
+                  onClick={() => fetchData(true)}
+                  className="btn btn-outline-dark btn-sm"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                >
+                  <HiOutlineRefresh /> Generate Score Adjustments
+                </button>
+              </div>
+            )}
 
             {/* Dimension Radar Chart */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }} className="ats-charts-grid">

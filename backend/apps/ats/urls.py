@@ -22,5 +22,26 @@ urlpatterns = [
     path("profiles/seed/", views.ProfessionProfileSeedView.as_view(), name="ats-profiles-seed"),
     path("profile/<str:role>/", views.ProfessionProfileDetailView.as_view(), name="ats-profile-detail"),
     path("profile/", views.ProfessionProfileDetailView.as_view(), name="ats-profile-create"),
+    # Category Scoring Engine endpoints
+    path("categories/", views.CategoryListView.as_view(), name="ats-categories-list"),
+    path("category-score/", views.CategoryScoreDetailView.as_view(), name="ats-category-score"),
+    path("category-report/", views.CategoryReportView.as_view(), name="ats-category-report"),
+    # Phase D Penalty & Bonus Engine endpoints
+    path("adjustments/", views.ATSAdjustmentsView.as_view(), name="ats-adjustments"),
+    path("penalties/", views.ATSPenaltiesView.as_view(), name="ats-penalties"),
+    path("bonuses/", views.ATSBonusesView.as_view(), name="ats-bonuses"),
+    # Phase G Explainable ATS Intelligence endpoints
+    path("explain/", views.ExplainScoreView.as_view(), name="ats-explain"),
+    path("explanation/", views.ExplanationDetailView.as_view(), name="ats-explanation"),
+    path("simulate/", views.SimulateScoreView.as_view(), name="ats-simulate"),
+    path("action-plan/", views.ActionPlanView.as_view(), name="ats-action-plan"),
     path("<uuid:resume_id>/", views.ATSDetailView.as_view(), name="ats-detail"),
+    # Phase H Calibration & Validation endpoints
+    path("calibrate/", views.CalibrateView.as_view(), name="ats-calibrate"),
+    path("validate/", views.ValidateView.as_view(), name="ats-validate"),
+    path("health/", views.EngineHealthView.as_view(), name="ats-health"),
+    path("distribution/", views.DistributionView.as_view(), name="ats-distribution"),
+    path("quality/", views.QualityReportView.as_view(), name="ats-quality"),
 ]
+
+

@@ -59,6 +59,8 @@ from apps.resumes.views import (
     ResumeCopilotSuggestionsView,
     ResumeCopilotChangesView,
 )
+from apps.jobs.views import JobATSView, JobATSReportView, JobATHistoryView
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -128,6 +130,16 @@ urlpatterns = [
     path("api/jobs/", include("apps.jobs.urls")),
     path("api/jd/", include("apps.jd_analyzer.urls")),
     path("api/ai/reputation/", include("apps.reputation.urls")),
+    
+    # Phase F: Benchmark & Ranking Engine routes
+    path("api/", include("apps.benchmarks.urls")),
+
+    # Phase E: Job-Specific ATS routes
+    path("api/job-ats/", include([
+        path("", JobATSView.as_view(), name="job-ats-evaluate"),
+        path("report/", JobATSReportView.as_view(), name="job-ats-report"),
+        path("history/", JobATHistoryView.as_view(), name="job-ats-history"),
+    ])),
 ]
 
 # Serve media and static files in development

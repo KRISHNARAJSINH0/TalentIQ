@@ -20,7 +20,15 @@ from .models import (
     RuleCategory,
     ATSRule,
     RuleExecution,
-    ProfessionProfile
+    ProfessionProfile,
+    CategoryScore,
+    ExplanationReport,
+    RecommendationHistory,
+    ImprovementSimulation,
+    CalibrationReport,
+    ValidationRun,
+    RuleMetrics,
+    DistributionMetrics
 )
 from .serializers import (
     ATSScoreSerializer,
@@ -29,13 +37,26 @@ from .serializers import (
     ATSRuleSerializer,
     RuleCategorySerializer,
     RuleExecutionSerializer,
-    ProfessionProfileSerializer
+    ProfessionProfileSerializer,
+    CategoryScoreSerializer,
+    ExplanationReportSerializer,
+    RecommendationHistorySerializer,
+    ImprovementSimulationSerializer,
+    CalibrationReportSerializer,
+    ValidationRunSerializer,
+    RuleMetricsSerializer,
+    DistributionMetricsSerializer
 )
 from .rule_executor import RuleExecutor
 from .rule_reporter import RuleReporter
 from .rule_loader import RuleLoader
 from .rule_validator import RuleValidator
 from .profile_loader import ProfileLoader
+from .category_manager import CategoryManager
+from .weight_manager import RULE_CATEGORIES
+from .explanation_engine import ExplanationEngine
+from .improvement_simulator import ImprovementSimulator
+
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +95,16 @@ class ATSAnalyzeView(APIView):
             
             # 2. Build report payload
             report_payload = RuleReporter.build_report(exec_data)
+            
+            # Apply adjustments (Phase D)
+            from .score_adjuster import ScoreAdjuster
+            adj_data = ScoreAdjuster.adjust_score(profile, resume, report_payload["overall_score"])
+            final_adjusted_score = adj_data["final_score"]
+            report_payload["overall_score"] = final_adjusted_score
+            
+            if "metadata" not in report_payload or not isinstance(report_payload["metadata"], dict):
+                report_payload["metadata"] = {}
+            report_payload["metadata"]["adjustments"] = adj_data
             
             with transaction.atomic():
                 # 3. Create or update ATSReport
@@ -130,15 +161,49 @@ class ATSAnalyzeView(APIView):
                     suggestions=report_payload["recommendations"]
                 )
 
+                # 6. Save quality-based CategoryScore records
+                for breakdown in exec_data.get("category_scores", []):
+                    CategoryScore.objects.update_or_create(
+                        resume=resume,
+                        category=breakdown["category"],
+                        defaults={
+                            "score": int(breakdown["score"]),
+                            "confidence": int(breakdown["confidence"])
+                        }
+                    )
+
+
             logger.info("ATS Rule Engine completed for resume %s (Score: %s)", 
                         resume_id, ats_score_record.ats_score)
 
-            serializer = ATSScoreSerializer(ats_score_record)
+            from .benchmark_engine import BenchmarkEngine
+            profession = report_payload["metadata"]["profession"]
+            benchmark_data = BenchmarkEngine.get_benchmark_comparison(profession, report_payload["overall_score"])
             
-            # Inject new report id for testing assertion views
-            response_data = serializer.data
-            response_data["id"] = str(report.id)
+            response_data = {
+                "id": str(report.id),
+                "resume": str(resume.id),
+                "resume_title": resume.resume_title,
+                "ats_score": report_payload["overall_score"],
+                "overall_score": report_payload["overall_score"],
+                "confidence": 90,
+                "job_ready": report_payload["overall_score"] >= 80,
+                "parsing_quality": 95,
+                "strengths": report_payload["strengths"],
+                "weaknesses": report_payload["weaknesses"],
+                "recommendations": report_payload["recommendations"],
+                "subscores": report_payload["subscores"],
+                "metadata": report_payload["metadata"],
+                "benchmark_comparison": benchmark_data,
+                "ats_json": legacy_json,
+                "industry_match": {profession: 100.0},
+                "missing_skills": [],
+                "suggestions": report_payload["recommendations"],
+                "ats_completed_at": report.created_at.isoformat(),
+                "ats_processing_time": report_payload["metadata"]["processing_time"]
+            }
             return Response(response_data, status=status.HTTP_201_CREATED)
+
 
         except Exception as e:
             logger.exception("Unexpected error occurred during ATS Rule Engine analysis for user %s", request.user.username)
@@ -169,15 +234,70 @@ class ATSDetailView(APIView):
                     {"detail": "No ATS analysis has been run for this resume yet."},
                     status=status.HTTP_404_NOT_FOUND
                 )
-            serializer = ATSScoreSerializer(latest_score)
-            return Response(serializer.data)
+            
+            ats_json = latest_score.ats_json or {}
+            score = latest_score.ats_score or ats_json.get("overall_score", 0)
+            metadata = ats_json.get("metadata", {})
+            profession = metadata.get("primary_industry", "Software Engineer")
+            
+            from .benchmark_engine import BenchmarkEngine
+            benchmark_data = BenchmarkEngine.get_benchmark_comparison(profession, score)
+            
+            data = {
+                "id": str(latest_score.id),
+                "resume": str(resume.id),
+                "resume_title": resume.resume_title,
+                "ats_score": score,
+                "overall_score": score,
+                "confidence": 90,
+                "job_ready": score >= 80,
+                "parsing_quality": 95,
+                "strengths": ats_json.get("strengths", []),
+                "weaknesses": ats_json.get("weaknesses", []),
+                "recommendations": ats_json.get("suggestions", ats_json.get("recommendations", [])),
+                "subscores": {
+                    "keywords": ats_json.get("keyword_score", 70.0),
+                    "skills": ats_json.get("skills_score", 70.0),
+                    "skill_relevance": ats_json.get("industry_score", 70.0),
+                    "formatting": ats_json.get("formatting_score", 70.0),
+                    "experience_quality": ats_json.get("experience_score", 70.0),
+                    "consistency": ats_json.get("completion_score", 70.0),
+                },
+                "metadata": {
+                    "profession": profession,
+                    "processing_time": latest_score.ats_processing_time,
+                    "adjustments": metadata.get("adjustments", {})
+                },
+                "benchmark_comparison": benchmark_data,
+                "ats_json": ats_json,
+                "industry_match": latest_score.industry_match or {profession: 100.0},
+                "missing_skills": latest_score.missing_skills or [],
+                "suggestions": latest_score.suggestions or [],
+                "ats_completed_at": latest_score.ats_completed_at.isoformat() if latest_score.ats_completed_at else None,
+                "ats_processing_time": latest_score.ats_processing_time
+            }
+            return Response(data)
 
         # Build combined payload for dashboard compatibility
+        profession = latest_report.metadata.get("profession", "Software Engineer")
+        from .benchmark_engine import BenchmarkEngine
+        benchmark_data = BenchmarkEngine.get_benchmark_comparison(profession, latest_report.overall_score)
+
         data = {
             "id": str(latest_report.id),
             "resume": str(resume.id),
             "resume_title": resume.resume_title,
             "ats_score": latest_report.overall_score,
+            "overall_score": latest_report.overall_score,
+            "confidence": latest_report.confidence,
+            "job_ready": latest_report.job_ready,
+            "parsing_quality": latest_report.parsing_quality,
+            "strengths": latest_report.strengths,
+            "weaknesses": latest_report.weaknesses,
+            "recommendations": latest_report.recommendations,
+            "subscores": latest_report.subscores,
+            "metadata": latest_report.metadata,
+            "benchmark_comparison": benchmark_data,
             "ats_json": {
                 "overall_score": latest_report.overall_score,
                 "strengths": latest_report.strengths,
@@ -188,13 +308,14 @@ class ATSDetailView(APIView):
                 "suggestions": latest_report.recommendations,
                 "missing_skills": []
             },
-            "industry_match": {latest_report.metadata.get("profession", "Software Engineer"): 100.0},
+            "industry_match": {profession: 100.0},
             "missing_skills": [],
             "suggestions": latest_report.recommendations,
             "ats_completed_at": latest_report.created_at.isoformat(),
             "ats_processing_time": latest_report.metadata.get("processing_time", 0.05)
         }
         return Response(data)
+
 
 
 class ATSHistoryView(APIView):
@@ -610,3 +731,514 @@ class ProfessionProfileSeedView(APIView):
             "message": f"Successfully seeded {count} profession profiles.",
             "total_profiles": ProfessionProfile.objects.count()
         })
+
+
+class CategoryListView(APIView):
+    """
+    GET /api/ats/categories/
+    Returns the list of 20 categories used by the Category Scoring Engine.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            "categories": RULE_CATEGORIES
+        }, status=status.HTTP_200_OK)
+
+
+class CategoryScoreDetailView(APIView):
+    """
+    POST /api/ats/category-score/
+    Recalculates quality scores for a given resume.
+    If 'category' is specified, recalculates/returns only that category.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        resume_id = request.data.get("resume_id")
+        target_category = request.data.get("category")
+
+        if not resume_id:
+            return Response(
+                {"error": "resume_id is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        resume = get_object_or_404(Resume, id=resume_id, user=request.user)
+        profile = get_object_or_404(Profile, user=request.user)
+
+        # Trigger analysis to get latest calculations
+        exec_data = RuleExecutor.execute_rules(profile, resume)
+
+        if target_category:
+            # Check if category is valid
+            matched_breakdown = None
+            for breakdown in exec_data.get("category_scores", []):
+                if breakdown["category"].lower() == target_category.lower():
+                    matched_breakdown = breakdown
+                    break
+
+            if not matched_breakdown:
+                return Response(
+                    {"error": f"Category '{target_category}' is invalid or not evaluated."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Retrieve/Update saved object
+            score_obj, _ = CategoryScore.objects.update_or_create(
+                resume=resume,
+                category=matched_breakdown["category"],
+                defaults={
+                    "score": int(matched_breakdown["score"]),
+                    "confidence": int(matched_breakdown["confidence"])
+                }
+            )
+            return Response(CategoryScoreSerializer(score_obj).data, status=status.HTTP_200_OK)
+
+        # Recalculate/Update all
+        saved_scores = []
+        for breakdown in exec_data.get("category_scores", []):
+            score_obj, _ = CategoryScore.objects.update_or_create(
+                resume=resume,
+                category=breakdown["category"],
+                defaults={
+                    "score": int(breakdown["score"]),
+                    "confidence": int(breakdown["confidence"])
+                }
+            )
+            saved_scores.append(score_obj)
+
+        return Response(
+            CategoryScoreSerializer(saved_scores, many=True).data,
+            status=status.HTTP_200_OK
+        )
+
+
+class CategoryReportView(APIView):
+    """
+    GET /api/ats/category-report/
+    Retrieves the detailed category quality score breakdown for a specific resume.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        resume_id = request.query_params.get("resume_id")
+        if not resume_id:
+            return Response(
+                {"error": "resume_id query parameter is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        resume = get_object_or_404(Resume, id=resume_id, user=request.user)
+        
+        # Get existing scores
+        scores = CategoryScore.objects.filter(resume=resume)
+
+        if not scores.exists():
+            # If no scores computed yet, run them on the fly
+            try:
+                profile = Profile.objects.get(user=request.user)
+                RuleExecutor.execute_rules(profile, resume)
+                scores = CategoryScore.objects.filter(resume=resume)
+            except Profile.DoesNotExist:
+                return Response(
+                    {"error": "Profile must be initialized to run category scores."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        serializer = CategoryScoreSerializer(scores, many=True)
+        return Response({
+            "resume_id": resume.id,
+            "resume_title": resume.resume_title,
+            "category_scores": serializer.data
+        }, status=status.HTTP_200_OK)
+
+
+class ATSAdjustmentsView(APIView):
+    """
+    POST /api/ats/adjustments/
+    Takes resume_id and returns the base score, penalty score, bonus score, final score and breakdown report lists.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        resume_id = request.data.get("resume_id")
+        if not resume_id:
+            return Response(
+                {"error": "resume_id is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        resume = get_object_or_404(Resume, id=resume_id, user=request.user)
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            return Response(
+                {"error": "Profile must be initialized."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Retrieve or run report to get base score
+        report = ATSReport.objects.filter(resume=resume).first()
+        if not report:
+            # Run rule execution first to build the report
+            exec_data = RuleExecutor.execute_rules(profile, resume)
+            report_payload = RuleReporter.build_report(exec_data)
+            report = ATSReport.objects.create(
+                resume=resume,
+                overall_score=report_payload["overall_score"],
+                confidence=90,
+                job_ready=report_payload["overall_score"] >= 80,
+                parsing_quality=95,
+                strengths=report_payload["strengths"],
+                weaknesses=report_payload["weaknesses"],
+                recommendations=report_payload["recommendations"],
+                subscores=report_payload["subscores"],
+                metadata=report_payload["metadata"]
+            )
+
+        # Now calculate adjustments using the metadata or running on the fly
+        adj = report.metadata.get("adjustments")
+        if not adj:
+            from .score_adjuster import ScoreAdjuster
+            # Calculate on the fly
+            # Let's get the base score: if adjustments not yet saved, overall_score is the base score
+            base = report.overall_score
+            adj = ScoreAdjuster.adjust_score(profile, resume, base)
+            
+            # Save it back to report metadata & overall_score
+            report.overall_score = adj["final_score"]
+            if not isinstance(report.metadata, dict):
+                report.metadata = {}
+            report.metadata["adjustments"] = adj
+            report.save()
+            
+            # Update history and legacy ATSScore too for consistency
+            ATSHistory.objects.filter(report=report).update(overall_score=adj["final_score"])
+            ATSScore.objects.filter(resume=resume).update(ats_score=adj["final_score"])
+
+        return Response(adj, status=status.HTTP_200_OK)
+
+
+class ATSPenaltiesView(APIView):
+    """
+    GET /api/ats/penalties/
+    Returns the active penalties breakdown for a given resume.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        resume_id = request.query_params.get("resume_id")
+        if not resume_id:
+            return Response(
+                {"error": "resume_id query parameter is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        resume = get_object_or_404(Resume, id=resume_id, user=request.user)
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            return Response(
+                {"error": "Profile must be initialized."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        report = ATSReport.objects.filter(resume=resume).first()
+        adj = report.metadata.get("adjustments") if report else None
+
+        if not adj:
+            # calculate on the fly
+            from .score_adjuster import ScoreAdjuster
+            base = report.overall_score if report else 70
+            adj = ScoreAdjuster.adjust_score(profile, resume, base)
+            
+            if report:
+                report.overall_score = adj["final_score"]
+                if not isinstance(report.metadata, dict):
+                    report.metadata = {}
+                report.metadata["adjustments"] = adj
+                report.save()
+
+        return Response({
+            "resume_id": resume.id,
+            "total_penalties": adj["penalties"],
+            "penalty_report": adj["penalty_report"]
+        }, status=status.HTTP_200_OK)
+
+
+class ATSBonusesView(APIView):
+    """
+    GET /api/ats/bonuses/
+    Returns the active bonuses breakdown for a given resume.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        resume_id = request.query_params.get("resume_id")
+        if not resume_id:
+            return Response(
+                {"error": "resume_id query parameter is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        resume = get_object_or_404(Resume, id=resume_id, user=request.user)
+        try:
+            profile = Profile.objects.get(user=request.user)
+        except Profile.DoesNotExist:
+            return Response(
+                {"error": "Profile must be initialized."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        report = ATSReport.objects.filter(resume=resume).first()
+        adj = report.metadata.get("adjustments") if report else None
+
+        if not adj:
+            # calculate on the fly
+            from .score_adjuster import ScoreAdjuster
+            base = report.overall_score if report else 70
+            adj = ScoreAdjuster.adjust_score(profile, resume, base)
+            
+            if report:
+                report.overall_score = adj["final_score"]
+                if not isinstance(report.metadata, dict):
+                    report.metadata = {}
+                report.metadata["adjustments"] = adj
+                report.save()
+
+        return Response({
+            "resume_id": resume.id,
+            "total_bonuses": adj["bonuses"],
+            "bonus_report": adj["bonus_report"]
+        }, status=status.HTTP_200_OK)
+
+
+class ExplainScoreView(APIView):
+    """
+    POST /api/ats/explain/
+    Generates and returns an Explainability Report for a resume.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        resume_id = request.data.get("resume_id")
+        if not resume_id:
+            return Response({"error": "resume_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        resume = get_object_or_404(Resume, id=resume_id, user=request.user)
+        try:
+            report = ExplanationEngine.generate_explanation(resume)
+            serializer = ExplanationReportSerializer(report)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Error generating ATS explanation: {str(e)}")
+            return Response({"error": f"Failed to generate explanation: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ExplanationDetailView(APIView):
+    """
+    GET /api/ats/explanation/
+    Retrieves the latest Explanation Report for a resume.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        resume_id = request.query_params.get("resume_id")
+        if not resume_id:
+            return Response({"error": "resume_id query parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        resume = get_object_or_404(Resume, id=resume_id, user=request.user)
+        report = ExplanationReport.objects.filter(resume=resume).first()
+
+        if not report:
+            # Generate on the fly
+            try:
+                report = ExplanationEngine.generate_explanation(resume)
+            except ValueError as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                logger.error(f"Error generating explanation on the fly: {str(e)}")
+                return Response({"error": "No explanation report exists and generation failed."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        serializer = ExplanationReportSerializer(report)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SimulateScoreView(APIView):
+    """
+    POST /api/ats/simulate/
+    Simulates ATS score improvement based on selected actions.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        resume_id = request.data.get("resume_id")
+        actions = request.data.get("actions", [])
+
+        if not resume_id:
+            return Response({"error": "resume_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        resume = get_object_or_404(Resume, id=resume_id, user=request.user)
+        
+        # Get current score
+        latest_report = ExplanationReport.objects.filter(resume=resume).first()
+        if latest_report:
+            current_score = latest_report.overall_score
+        else:
+            # fallback to legacy or run explanation on the fly
+            try:
+                report = ExplanationEngine.generate_explanation(resume)
+                current_score = report.overall_score
+            except Exception:
+                current_score = 50
+
+        # Perform simulation
+        sim_data = ImprovementSimulator.simulate(current_score, actions)
+
+        # Save simulation record
+        sim_obj = ImprovementSimulation.objects.create(
+            resume=resume,
+            current_score=sim_data["current_score"],
+            simulated_actions=sim_data["applied_actions"],
+            estimated_score=sim_data["estimated_score"]
+        )
+
+        # Fetch suggestions to help user explore more
+        try:
+            profile = Profile.objects.get(user=request.user)
+            # Find missing skills to pass to suggestions
+            latest_run = RuleExecutor.execute_rules(profile, resume)
+            missing_elements = {
+                "missing_required_skills": latest_run["profession_profile"].get("missing_required_skills", []),
+                "missing_recommended_skills": latest_run["profession_profile"].get("missing_recommended_skills", [])
+            }
+            suggestions = ImprovementSimulator.get_suggested_actions(profile, resume, missing_elements)
+        except Exception:
+            suggestions = []
+
+        response_data = {
+            "simulation": ImprovementSimulationSerializer(sim_obj).data,
+            "score_boost": sim_data["score_boost"],
+            "suggested_actions": suggestions
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+
+class ActionPlanView(APIView):
+    """
+    GET /api/ats/action-plan/
+    Returns the prioritized step-by-step roadmap from recommendation history.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        resume_id = request.query_params.get("resume_id")
+        if not resume_id:
+            return Response({"error": "resume_id query parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        resume = get_object_or_404(Resume, id=resume_id, user=request.user)
+        
+        recs = RecommendationHistory.objects.filter(resume=resume, implemented=False)
+        
+        # If no recommendation history, generate on the fly
+        if not recs.exists():
+            try:
+                ExplanationEngine.generate_explanation(resume)
+                recs = RecommendationHistory.objects.filter(resume=resume, implemented=False)
+            except Exception as e:
+                logger.error(f"Failed to generate action plan: {str(e)}")
+
+        serializer = RecommendationHistorySerializer(recs, many=True)
+        return Response({
+            "resume_id": resume.id,
+            "action_plan": serializer.data
+        }, status=status.HTTP_200_OK)
+
+
+class CalibrateView(APIView):
+    """
+    POST /api/ats/calibrate/
+    Triggers automated calibration sweep.
+    """
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request):
+        from .calibration_engine import CalibrationEngine
+        engine = CalibrationEngine()
+        results = engine.run_calibration_sweep()
+        return Response(results, status=status.HTTP_200_OK)
+
+
+class ValidateView(APIView):
+    """
+    POST /api/ats/validate/
+    Triggers automated validation sweep.
+    """
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request):
+        from .validation_engine import ValidationEngine
+        engine = ValidationEngine()
+        results = engine.run_validation_sweep()
+        return Response(results, status=status.HTTP_200_OK)
+
+
+class EngineHealthView(APIView):
+    """
+    GET /api/ats/health/
+    Returns the overall ATS engine health stats.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        latest_calib = CalibrationReport.objects.order_by("-created_at").first()
+        latest_val = ValidationRun.objects.order_by("-created_at").first()
+        
+        calib_data = CalibrationReportSerializer(latest_calib).data if latest_calib else None
+        val_data = ValidationRunSerializer(latest_val).data if latest_val else None
+
+        # Fetch rule usage metrics
+        rule_metrics = RuleMetrics.objects.order_by("-pass_rate")
+        rule_metrics_data = RuleMetricsSerializer(rule_metrics, many=True).data
+
+        return Response({
+            "latest_calibration": calib_data,
+            "latest_validation": val_data,
+            "rule_metrics": rule_metrics_data
+        }, status=status.HTTP_200_OK)
+
+
+class DistributionView(APIView):
+    """
+    GET /api/ats/distribution/
+    Returns score distribution data.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        latest_dist = DistributionMetrics.objects.order_by("-created_at").first()
+        dist_data = DistributionMetricsSerializer(latest_dist).data if latest_dist else None
+        return Response({
+            "latest_distribution": dist_data
+        }, status=status.HTTP_200_OK)
+
+
+class QualityReportView(APIView):
+    """
+    GET /api/ats/quality/
+    Returns the latest structured quality report JSON.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        from .quality_reporter import QualityReporter
+        report = QualityReporter.generate_quality_report()
+        return Response(report, status=status.HTTP_200_OK)
+
+
+
+

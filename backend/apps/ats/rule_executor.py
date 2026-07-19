@@ -208,41 +208,35 @@ class RuleExecutor:
             except Exception:
                 pass
 
-        # 9. Calculate Category Subscores
-        categories = RuleCategory.objects.all()
+        # 9. Invoke CategoryManager to run the quality scoring engine
+        from .category_manager import CategoryManager
+        
+        prof_data = {
+            "role": profession_profile.role,
+            "industry": profession_profile.industry,
+            "required_skills": profession_profile.required_skills,
+            "recommended_skills": profession_profile.recommended_skills,
+            "soft_skills": profession_profile.soft_skills,
+            "preferred_certifications": profession_profile.preferred_certifications,
+            "expected_projects": profession_profile.expected_projects,
+            "weights": profession_profile.weights,
+            "penalties": profession_profile.penalties,
+            "bonuses": profession_profile.bonuses,
+            "benchmark_group": profession_profile.benchmark_group
+        }
+        
+        cat_analysis = CategoryManager.evaluate_resume(profile, resume, prof_data)
+        
+        # Format subscores for backward compatibility
         subscores = {}
+        for breakdown in cat_analysis["category_scores"]:
+            subscores[breakdown["category"].lower()] = breakdown["score"]
 
-        for cat in categories:
-            cat_rules = [res for res in execution_results if res["category"] == cat.name]
-            if not cat_rules:
-                subscores[cat.name.lower()] = 100.0
-                continue
-
-            positive_possible = sum(res["points"] for res in cat_rules if res["points"] > 0)
-            positive_earned = sum(res["score_impact"] for res in cat_rules if res["status"] == "passed" and res["points"] > 0)
-            penalties_incurred = sum(abs(res["score_impact"]) for res in cat_rules if res["status"] == "failed" and res["points"] < 0)
-
-            if positive_possible > 0:
-                score = (positive_earned / positive_possible) * 100.0 - penalties_incurred
-            else:
-                score = 100.0 - penalties_incurred
-
-            subscores[cat.name.lower()] = max(0.0, min(100.0, score))
-
-        # 10. Get profession-specific category weights from WeightManager
-        category_weights = WeightManager.get_category_weights(profession_profile.weights)
-
-        # 11. Calculate Overall Score using Profession-Specific Category Weights
-        weighted_sum = 0.0
-        total_weight = 0.0
-        for cat_name, weight in category_weights.items():
-            weighted_sum += subscores.get(cat_name.lower(), 100.0) * weight
-            total_weight += weight
-
-        overall_score = round(weighted_sum / total_weight) if total_weight > 0 else 70
-
+        overall_score = cat_analysis["overall_score"]
+        
         # Apply profession profile penalties and bonuses
-        overall_score = max(0, min(100, overall_score - profile_penalties + profile_bonuses))
+        overall_score = max(0.0, min(100.0, overall_score - profile_penalties + profile_bonuses))
+
 
         # Adjust score if in Job-Specific match mode
         job_match_score = None
@@ -280,5 +274,10 @@ class RuleExecutor:
             "processing_time": processing_time,
             "job_match_score": job_match_score,
             "profile_penalties": profile_penalties,
-            "profile_bonuses": profile_bonuses
+            "profile_bonuses": profile_bonuses,
+            "category_scores": cat_analysis["category_scores"],
+            "strengths": cat_analysis["strengths"],
+            "weaknesses": cat_analysis["weaknesses"],
+            "recommendations": cat_analysis["recommendations"]
         }
+

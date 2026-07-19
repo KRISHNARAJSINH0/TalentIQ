@@ -239,3 +239,132 @@ class JobSkillsGapView(BaseJobView):
             "recommendations": result.get("recommendations", {})
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+from .services.job_ats_engine import JobATSEngine
+from .models import JobATSReport, InterviewReadiness
+from .serializers import JobATSReportSerializer, InterviewReadinessSerializer
+
+class JobATSView(BaseJobView):
+    """
+    POST: /api/job-ats/
+    Evaluates a resume against a specific target Job Description and returns report.
+    """
+    def post(self, request):
+        resume, profile = self.get_resume_and_profile(request)
+        if not resume:
+            return Response(
+                {"error": "No resume found. Please upload a resume first."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        job_description = request.data.get("job_description")
+        if not job_description:
+            return Response(
+                {"error": "job_description is a required field."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        company_name = request.data.get("company_name", "")
+        
+        try:
+            # Run engine evaluation
+            eval_result = JobATSEngine.evaluate(resume, job_description, company_name)
+            
+            # Persist JobATSReport
+            report = JobATSReport.objects.create(
+                resume=resume,
+                job_title=request.data.get("job_title", "Target Role"),
+                company_name=company_name or eval_result["company_analysis"]["company_name"],
+                job_description=job_description,
+                overall_match=eval_result["overall_match"],
+                ats_score=eval_result["ats_score"],
+                interview_readiness=eval_result["interview_readiness"],
+                role_match=eval_result["role_match"],
+                skills_match=eval_result["skills_match"],
+                experience_match=eval_result["experience_match"],
+                education_match=eval_result["education_match"],
+                projects_match=eval_result["projects_match"],
+                missing_skills=eval_result["missing_skills"],
+                recommendations=eval_result["recommendations"],
+                metadata=eval_result
+            )
+            
+            # Persist InterviewReadiness
+            int_analysis = eval_result["interview_analysis"]
+            InterviewReadiness.objects.create(
+                resume=resume,
+                job_title=report.job_title,
+                technical_score=int_analysis["technical_score"],
+                projects_score=int_analysis["projects_score"],
+                experience_score=int_analysis["experience_score"],
+                leadership_score=int_analysis["leadership_score"],
+                communication_score=int_analysis["communication_score"],
+                overall_readiness=eval_result["interview_readiness"],
+                feedback=int_analysis["feedback"]
+            )
+            
+            # Serialize report and return
+            serializer = JobATSReportSerializer(report)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            logger.error(f"Job ATS evaluation failed: {e}", exc_info=True)
+            return Response(
+                {"error": f"Failed to perform Job ATS evaluation: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class JobATSReportView(BaseJobView):
+    """
+    POST: /api/job-ats/report/
+    Retrieves a specific evaluation report by ID or latest.
+    """
+    def post(self, request):
+        resume, _ = self.get_resume_and_profile(request)
+        if not resume:
+            return Response(
+                {"error": "No resume found. Please upload a resume first."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        report_id = request.data.get("report_id")
+        try:
+            if report_id:
+                report = JobATSReport.objects.get(id=report_id, resume=resume)
+            else:
+                report = JobATSReport.objects.filter(resume=resume).order_by("-created_at").first()
+                
+            if not report:
+                return Response(
+                    {"error": "No report found."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+                
+            serializer = JobATSReportSerializer(report)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Failed to fetch report: {e}", exc_info=True)
+            return Response(
+                {"error": f"Failed to fetch report: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class JobATHistoryView(BaseJobView):
+    """
+    GET: /api/job-ats/history/
+    Retrieves previous Job ATS evaluation records.
+    """
+    def get(self, request):
+        resume, _ = self.get_resume_and_profile(request)
+        if not resume:
+            return Response(
+                {"error": "No resume found. Please upload a resume first."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        reports = JobATSReport.objects.filter(resume=resume).order_by("-created_at")
+        serializer = JobATSReportSerializer(reports, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+

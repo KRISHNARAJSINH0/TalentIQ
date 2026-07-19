@@ -9,7 +9,8 @@ import {
   HiOutlineCheck,
   HiOutlineCpuChip,
   HiOutlineDocumentDuplicate,
-  HiOutlineSparkles
+  HiOutlineSparkles,
+  HiOutlineChartBar
 } from 'react-icons/hi2';
 import '../styles/Resumes.css';
 
@@ -604,6 +605,14 @@ const ResumeDetails = () => {
             <p style={{ fontSize: '0.8125rem', color: 'var(--gray-400)', marginBottom: '16px', lineHeight: 1.4 }}>
               Perform administrative operations on this resume file.
             </p>
+
+            <Link to={`/resumes/${resume.id}/job-ats`} className="btn-large btn-large-primary" style={{ width: '100%', display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)', border: 'none', color: 'white', textDecoration: 'none', marginBottom: '8px', fontWeight: 600 }}>
+              <HiOutlineSparkles size={20} /> Job-Specific ATS Match
+            </Link>
+
+            <Link to={`/resumes/${resume.id}/benchmark`} className="btn-large btn-large-primary" style={{ width: '100%', display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)', border: 'none', color: 'white', textDecoration: 'none', marginBottom: '8px', fontWeight: 600 }}>
+              <HiOutlineChartBar size={20} /> Cohort Benchmarks & Rankings
+            </Link>
 
             <button onClick={handleDownload} className="btn-large btn-large-primary" style={{ width: '100%', display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center' }}>
               <HiOutlineArrowDownTray size={20} /> Download File

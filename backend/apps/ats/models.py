@@ -356,4 +356,298 @@ class ProfessionProfile(BaseModel):
         return self.role
 
 
+class CategoryScore(BaseModel):
+    """
+    Quality score details calculated independently for a specific resume category.
+    """
+    resume = models.ForeignKey(
+        Resume,
+        on_delete=models.CASCADE,
+        related_name="category_scores",
+        verbose_name="Resume"
+    )
+    category = models.CharField(
+        max_length=100,
+        verbose_name="Category Name"
+    )
+    score = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Category Score"
+    )
+    confidence = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Confidence Score"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Created At"
+    )
+
+    class Meta(BaseModel.Meta):
+        verbose_name = "Category Score"
+        verbose_name_plural = "Category Scores"
+        unique_together = ("resume", "category")
+        ordering = ["category"]
+
+    def __str__(self):
+        return f"{self.category}: {self.score}/100 – {self.resume.resume_title}"
+class ExplanationReport(BaseModel):
+    """
+    Detailed explainability report for a resume's ATS score.
+    """
+    resume = models.ForeignKey(
+        Resume,
+        on_delete=models.CASCADE,
+        related_name="explanation_reports",
+        verbose_name="Resume"
+    )
+    overall_score = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Overall ATS Score"
+    )
+    confidence = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        default=95,
+        verbose_name="Explanation Confidence"
+    )
+    natural_language_report = models.TextField(
+        verbose_name="Natural Language Explanation"
+    )
+    category_explanations = models.JSONField(
+        default=dict,
+        verbose_name="Category Explanations Breakdown"
+    )
+    ats_score_breakdown = models.JSONField(
+        default=dict,
+        verbose_name="ATS Score Breakdown"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Created At"
+    )
+
+    class Meta(BaseModel.Meta):
+        verbose_name = "Explanation Report"
+        verbose_name_plural = "Explanation Reports"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Explanation: {self.overall_score}/100 – {self.resume.resume_title}"
+
+
+class RecommendationHistory(BaseModel):
+    """
+    Stores individual recommendations for a resume's score improvement.
+    Tracks whether the candidate implemented them.
+    """
+    resume = models.ForeignKey(
+        Resume,
+        on_delete=models.CASCADE,
+        related_name="recommendation_histories",
+        verbose_name="Resume"
+    )
+    category = models.CharField(
+        max_length=100,
+        verbose_name="Category"
+    )
+    recommendation_text = models.TextField(
+        verbose_name="Recommendation Text"
+    )
+    priority = models.CharField(
+        max_length=20,
+        choices=[
+            ("critical", "Critical"),
+            ("high", "High"),
+            ("medium", "Medium"),
+            ("low", "Low")
+        ],
+        verbose_name="Priority"
+    )
+    score_impact = models.IntegerField(
+        verbose_name="Score Impact"
+    )
+    implemented = models.BooleanField(
+        default=False,
+        verbose_name="Implemented"
+    )
+    applied_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Applied At"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Created At"
+    )
+
+    class Meta(BaseModel.Meta):
+        verbose_name = "Recommendation History"
+        verbose_name_plural = "Recommendation Histories"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        status = "Done" if self.implemented else "Pending"
+        return f"[{status}] {self.category} ({self.priority}) – {self.resume.resume_title}"
+
+
+class ImprovementSimulation(BaseModel):
+    """
+    Stores score simulations calculated by the user.
+    """
+    resume = models.ForeignKey(
+        Resume,
+        on_delete=models.CASCADE,
+        related_name="improvement_simulations",
+        verbose_name="Resume"
+    )
+    current_score = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Current Score"
+    )
+    simulated_actions = models.JSONField(
+        default=list,
+        verbose_name="Simulated Actions"
+    )
+    estimated_score = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Estimated Score"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Created At"
+    )
+
+    class Meta(BaseModel.Meta):
+        verbose_name = "Improvement Simulation"
+        verbose_name_plural = "Improvement Simulations"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Sim: {self.current_score} -> {self.estimated_score} – {self.resume.resume_title}"
+
+
+# ---------------------------------------------------------------------------
+# Phase H: Calibration, Validation & Continuous Learning Engine Models
+# ---------------------------------------------------------------------------
+
+class CalibrationReport(BaseModel):
+    """
+    Persists calibration audits containing engine health scores and system warnings.
+    """
+    engine_health = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Engine Health"
+    )
+    score_distribution = models.CharField(
+        max_length=50,
+        verbose_name="Score Distribution State"
+    )
+    rule_coverage = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Rule Coverage"
+    )
+    duplicate_rules = models.IntegerField(verbose_name="Duplicate Rules Count")
+    unused_rules = models.IntegerField(verbose_name="Unused Rules Count")
+    profession_accuracy = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name="Profession Accuracy"
+    )
+    recommendations = models.JSONField(
+        default=list,
+        verbose_name="Optimization Recommendations"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Created At"
+    )
+
+    class Meta(BaseModel.Meta):
+        verbose_name = "Calibration Report"
+        verbose_name_plural = "Calibration Reports"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Calib Health: {self.engine_health}% ({self.created_at.date()})"
+
+
+class ValidationRun(BaseModel):
+    """
+    Logs details of automated validation sweeps.
+    """
+    run_type = models.CharField(
+        max_length=50,
+        default="automated",
+        verbose_name="Run Type"
+    )
+    total_tests = models.IntegerField(verbose_name="Total Tests Run")
+    successful_tests = models.IntegerField(verbose_name="Successful Tests")
+    failed_tests = models.IntegerField(verbose_name="Failed Tests")
+    accuracy_rate = models.FloatField(verbose_name="Accuracy Rate")
+    error_log = models.JSONField(
+        default=list,
+        verbose_name="Anomalies and Errors Log"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Created At"
+    )
+
+    class Meta(BaseModel.Meta):
+        verbose_name = "Validation Run"
+        verbose_name_plural = "Validation Runs"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Validation {self.id[:8]} - Acc: {self.accuracy_rate:.1f}%"
+
+
+class RuleMetrics(BaseModel):
+    """
+    Stores metrics on rule execution frequency, pass rates, and conflict detections.
+    """
+    rule_code = models.CharField(max_length=100, unique=True, verbose_name="Rule Code")
+    rule_name = models.CharField(max_length=200, verbose_name="Rule Name")
+    times_executed = models.IntegerField(default=0, verbose_name="Times Executed")
+    times_passed = models.IntegerField(default=0, verbose_name="Times Passed")
+    times_failed = models.IntegerField(default=0, verbose_name="Times Failed")
+    pass_rate = models.FloatField(default=0.0, verbose_name="Pass Rate")
+    is_unused = models.BooleanField(default=False, verbose_name="Is Unused")
+    is_redundant = models.BooleanField(default=False, verbose_name="Is Redundant")
+    conflicts_with = models.JSONField(default=list, verbose_name="Conflicting Rules")
+
+    class Meta(BaseModel.Meta):
+        verbose_name = "Rule Metric"
+        verbose_name_plural = "Rule Metrics"
+
+    def __str__(self):
+        return f"{self.rule_code} (Pass: {self.pass_rate:.1f}%)"
+
+
+class DistributionMetrics(BaseModel):
+    """
+    Stores score statistical distribution metrics.
+    """
+    dataset_name = models.CharField(max_length=100, verbose_name="Dataset Name")
+    total_scores = models.IntegerField(verbose_name="Total Scores Analyzed")
+    average_score = models.FloatField(verbose_name="Average Score")
+    median_score = models.FloatField(verbose_name="Median Score")
+    variance = models.FloatField(verbose_name="Variance")
+    std_dev = models.FloatField(verbose_name="Standard Deviation")
+    score_ranges = models.JSONField(
+        default=dict,
+        verbose_name="Score Range Frequencies"
+    )
+    skewness = models.FloatField(default=0.0, verbose_name="Skewness")
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Created At"
+    )
+
+    class Meta(BaseModel.Meta):
+        verbose_name = "Distribution Metric"
+        verbose_name_plural = "Distribution Metrics"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Dist: {self.dataset_name} (Avg: {self.average_score:.1f})"
 

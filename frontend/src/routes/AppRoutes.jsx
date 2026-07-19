@@ -36,6 +36,12 @@ import TimelineAnalytics from '../pages/TimelineAnalytics';
 import JobDashboard from '../pages/JobDashboard';
 import JDAnalyzer from '../pages/JDAnalyzer';
 import ReputationDashboard from '../pages/ReputationDashboard';
+import JobATSDashboard from '../pages/JobATSDashboard';
+import BenchmarkDashboard from '../pages/BenchmarkDashboard';
+import ExplainableATSDashboard from '../pages/ExplainableATSDashboard';
+import ATSCalibrationDashboard from '../pages/admin/ATSCalibrationDashboard';
+
+
 
 const AppRoutes = () => {
   return (
@@ -88,6 +94,19 @@ const AppRoutes = () => {
           element={<ProtectedRoute><ATSDashboard /></ProtectedRoute>}
         />
         <Route
+          path="/resumes/:id/explainable-ats"
+          element={<ProtectedRoute><ExplainableATSDashboard /></ProtectedRoute>}
+        />
+        <Route
+          path="/resumes/:id/job-ats"
+          element={<ProtectedRoute><JobATSDashboard /></ProtectedRoute>}
+        />
+        <Route
+          path="/resumes/:id/benchmark"
+          element={<ProtectedRoute><BenchmarkDashboard /></ProtectedRoute>}
+        />
+
+        <Route
           path="/career"
           element={<ProtectedRoute><CareerDashboard /></ProtectedRoute>}
         />
@@ -138,7 +157,9 @@ const AppRoutes = () => {
         <Route path="/admin/reports" element={<AdminReports />} />
         <Route path="/admin/system" element={<AdminSystem />} />
         <Route path="/admin/logs" element={<AdminLogs />} />
+        <Route path="/admin/ats-calibration" element={<ATSCalibrationDashboard />} />
       </Route>
+
 
       {/* Standalone public portfolios (no app shell/global navbar) */}
       <Route path="/portfolio/:slug" element={<PortfolioPublic />} />

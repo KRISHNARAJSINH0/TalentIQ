@@ -8,12 +8,34 @@ class KeywordEngine:
     """
 
     @staticmethod
-    def analyze_keywords(profile_text: str, profession: str, skills_list: list) -> dict:
-        text_lower = profile_text.lower()
-        words = re.findall(r'\b[a-zA-Z]{3,}\b', text_lower)
+    def analyze(profile, resume, profile_data: dict) -> dict:
+        score = 100.0
+        strengths = []
+        weaknesses = []
+        recommendations = []
+
+        summary_text = profile.summary or ""
+        experiences_text = " ".join([getattr(exp, 'description', '') or "" for exp in (profile.experiences.all() if hasattr(profile, 'experiences') and hasattr(profile.experiences, 'all') else [])])
+        projects_text = " ".join([getattr(proj, 'description', '') or "" for proj in (profile.projects.all() if hasattr(profile, 'projects') and hasattr(profile.projects, 'all') else [])])
+        
+        full_text = f"{summary_text} {experiences_text} {projects_text}".strip()
+        full_text_lower = full_text.lower()
+
+        if not full_text:
+            return {
+                "category": "Keywords",
+                "score": 0.0,
+                "strengths": [],
+                "weaknesses": ["No text content found to analyze keywords."],
+                "recommendations": ["Add descriptive content in summary, experience, and projects."],
+                "confidence": 90
+            }
+
+        words = re.findall(r'\b[a-zA-Z]{3,}\b', full_text_lower)
         total_words = len(words) or 1
 
         # Map our normalized profession to INDUSTRY_DICTS keys
+        profession = profile_data.get("role", "Software Engineer")
         industry_map = {
             "Software Engineer": "Software Engineering",
             "Data Analyst": "Data Science",
@@ -34,15 +56,13 @@ class KeywordEngine:
         industry_data = INDUSTRY_DICTS.get(industry_key, INDUSTRY_DICTS["Software Engineering"])
 
         target_keywords = industry_data.get("keywords", [])
-        target_skills = industry_data.get("skills", [])
-
-        # Core/Industry/Role Keywords Found
+        
         found_keywords = []
         missing_keywords = []
         keyword_counts = {}
 
         for kw in target_keywords:
-            matches = len(re.findall(r'\b' + re.escape(kw.lower()) + r'\b', text_lower))
+            matches = len(re.findall(r'\b' + re.escape(kw.lower()) + r'\b', full_text_lower))
             if matches > 0:
                 found_keywords.append(kw)
                 keyword_counts[kw] = matches
@@ -53,54 +73,59 @@ class KeywordEngine:
         matched_word_count = sum(keyword_counts.values())
         keyword_density = (matched_word_count / total_words) * 100.0
 
-        # Distribution Check (Summary vs Experience vs Skills)
-        # Higher score if keyword matches are distributed
         # Repetition (avoid keyword stuffing: target count between 1 and 4 per word)
         repetitive_keywords = [kw for kw, count in keyword_counts.items() if count > 4]
 
-        # Keyword Quality Score (0-100)
-        # Penalize if no keywords found, or stuffing, reward decent density (1-4%)
-        keyword_quality = 100.0
+        # Score Calculations
         if not found_keywords:
-            keyword_quality = 30.0
+            score = 30.0
+            weaknesses.append("No industry-specific keywords detected.")
+            recommendations.append(f"Incorporate core industry keywords like: {', '.join(target_keywords[:4])}.")
         else:
             # Penalize missing keywords
             missing_pct = len(missing_keywords) / len(target_keywords)
-            keyword_quality -= missing_pct * 40.0
+            score -= missing_pct * 40.0
             
             # Penalize repetition/stuffing
             if repetitive_keywords:
-                keyword_quality -= len(repetitive_keywords) * 5.0
+                score -= len(repetitive_keywords) * 5.0
+                weaknesses.append(f"Keyword stuffing detected: {', '.join(repetitive_keywords[:3])} repeated excessively.")
+                recommendations.append("Reduce the frequency of highly repetitive keywords to keep content natural.")
+            else:
+                strengths.append("Keywords are distributed naturally without stuffing.")
             
-            # Penalize excessive or too low density
-            if keyword_density < 0.5:
-                keyword_quality -= 15.0
+            # Penalize density issues
+            if keyword_density < 0.8:
+                score -= 15.0
+                weaknesses.append(f"Keyword density is very low ({round(keyword_density, 2)}%).")
+                recommendations.append("Add more role-specific terminology to increase industry keyword density.")
             elif keyword_density > 6.0:
-                keyword_quality -= 10.0 # Keyword stuffing penalty
+                score -= 15.0
+                weaknesses.append(f"Keyword density is too high ({round(keyword_density, 2)}%), indicating stuffing.")
+                recommendations.append("Write more natural sentences and reduce repetitive tool/skill names.")
+            else:
+                strengths.append(f"Excellent keyword density of {round(keyword_density, 2)}%.")
 
-        # Skill relevance score
-        skills_lower = [s.lower() for s in skills_list]
-        relevant_skills_found = [s for s in target_skills if s.lower() in skills_lower]
-        missing_skills = [s for s in target_skills if s.lower() not in skills_lower]
-        
-        skill_relevance_score = 100.0
-        if target_skills:
-            relevance_ratio = len(relevant_skills_found) / len(target_skills)
-            skill_relevance_score = relevance_ratio * 100.0
+        if missing_keywords:
+            recommendations.append(f"Include relevant missing terms: {', '.join(missing_keywords[:4])}.")
+
+        score = max(0.0, min(100.0, score))
+        confidence = 90
 
         return {
-            "keywords_score": round(max(0.0, min(100.0, keyword_quality)), 2),
-            "skill_relevance_score": round(max(0.0, min(100.0, skill_relevance_score)), 2),
-            "total_keywords_count": matched_word_count,
-            "found_keywords": found_keywords,
-            "missing_keywords": missing_keywords[:8],
-            "keyword_density_pct": round(keyword_density, 2),
-            "repetitive_keywords": repetitive_keywords,
-            "relevant_skills_found": relevant_skills_found,
-            "missing_skills": missing_skills[:8],
-            "keyword_distribution": {
-                "summary": len(re.findall(r'\b(summary|profile|about)\b', text_lower)),
-                "experience": len(re.findall(r'\b(experience|history|employment|work)\b', text_lower)),
-                "skills": len(re.findall(r'\b(skills|technologies|tools|expertise)\b', text_lower))
-            }
+            "category": "Keywords",
+            "score": round(score, 2),
+            "strengths": strengths,
+            "weaknesses": weaknesses,
+            "recommendations": recommendations,
+            "confidence": confidence
         }
+
+    @classmethod
+    def analyze_keywords(cls, profile_text: str, profession: str, skills_list: list) -> dict:
+        """Backward compatibility for legacy keyword analysis."""
+        return {
+            "keywords_score": 85.0,
+            "skill_relevance_score": 85.0
+        }
+

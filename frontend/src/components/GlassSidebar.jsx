@@ -44,6 +44,8 @@ const GlassSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
     { to: '/resumes', label: 'Resume', icon: <Hi2.HiOutlineDocumentText size={20} /> },
     { to: '/resumes', label: 'Parser', icon: <Hi2.HiOutlineArrowUpTray size={20} />, hash: '#upload' },
     { to: activeResumeId ? `/resumes/${activeResumeId}/ats` : '/resumes', label: 'ATS', icon: <Hi2.HiOutlineCpuChip size={20} /> },
+    { to: activeResumeId ? `/resumes/${activeResumeId}/job-ats` : '/resumes', label: 'Job ATS', icon: <Hi2.HiOutlineSparkles size={20} /> },
+    { to: activeResumeId ? `/resumes/${activeResumeId}/benchmark` : '/resumes', label: 'Benchmark', icon: <Hi2.HiOutlineChartBar size={20} /> },
     {to: '/portfolio', label: 'Portfolio', icon: <Hi2.HiOutlineGlobeAlt size={20} />},
     {to: '/career', label: 'Career Assistant', icon: <Hi2.HiOutlineChatBubbleLeftRight size={20} />},
     {to: '/career/reputation', label: 'Reputation', icon: <Hi2.HiOutlineCheckBadge size={20} />},
@@ -91,7 +93,7 @@ const GlassSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
       </div>
 
       {/* Navigation Items */}
-      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto', minHeight: 0 }} className="sidebar-nav-container">
         {navItems.map((item, index) => {
           const isActive = (() => {
             const { pathname, hash } = location;
@@ -99,13 +101,19 @@ const GlassSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
               return pathname === item.to && hash === item.hash;
             }
             if (item.label === 'ATS') {
-              return pathname.includes('/ats');
+              return pathname.includes('/ats') && !pathname.includes('/job-ats') && !pathname.includes('/benchmark');
+            }
+            if (item.label === 'Job ATS') {
+              return pathname.includes('/job-ats');
+            }
+            if (item.label === 'Benchmark') {
+              return pathname.includes('/benchmark');
             }
             if (item.label === 'Parser') {
               return pathname === '/resumes' && hash === '#upload';
             }
             if (item.label === 'Resume') {
-              return pathname.startsWith('/resumes') && !pathname.includes('/ats') && hash !== '#upload';
+              return pathname.startsWith('/resumes') && !pathname.includes('/ats') && !pathname.includes('/job-ats') && !pathname.includes('/benchmark') && hash !== '#upload';
             }
             if (item.to === '/career') {
               return pathname === '/career' || pathname === '/career/roadmap' || pathname === '/career/cover-letter';
@@ -234,6 +242,7 @@ const GlassSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
                 WebkitBackdropFilter: 'blur(20px)',
                 border: '1px solid var(--glass-border)',
                 boxShadow: '0 10px 40px var(--glass-shadow)',
+                overflow: 'hidden',
               }}
             >
               {content}
@@ -256,6 +265,23 @@ const GlassSidebar = ({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOp
           color: #FFFFFF !important;
           transform: none !important;
           background: var(--gradient-primary) !important;
+        }
+        .sidebar-nav-container::-webkit-scrollbar {
+          width: 6px;
+        }
+        .sidebar-nav-container::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .sidebar-nav-container::-webkit-scrollbar-thumb {
+          background: rgba(37, 99, 235, 0.15);
+          border-radius: 6px;
+        }
+        .sidebar-nav-container::-webkit-scrollbar-thumb:hover {
+          background: rgba(37, 99, 235, 0.35);
+        }
+        .sidebar-nav-container {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(37, 99, 235, 0.15) transparent;
         }
       `}</style>
     </>

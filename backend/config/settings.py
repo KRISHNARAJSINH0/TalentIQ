@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "apps.jobs",
     "apps.jd_analyzer",
     "apps.reputation",
+    "apps.benchmarks",
 ]
 
 MIDDLEWARE = [
