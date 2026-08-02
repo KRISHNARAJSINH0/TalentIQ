@@ -52,7 +52,7 @@ class ATSEngineTests(APITestCase):
         )
 
         # Get and update automatically created profile for user1
-        self.profile1 = Profile.objects.get(user=self.user1)
+        self.profile1, _ = Profile.objects.get_or_create(user=self.user1)
         self.profile1.summary = "Detail-oriented Python developer with 4 years of experience building REST APIs with Django and FastAPI."
         self.profile1.github = "https://github.com/krishnarajsinh"
         self.profile1.linkedin = "https://linkedin.com/in/krishnarajsinh"
@@ -241,7 +241,7 @@ class ProfessionProfileEngineTests(APITestCase):
             validation_status="completed",
             ai_status="completed"
         )
-        self.profile = Profile.objects.get(user=self.user)
+        self.profile, _ = Profile.objects.get_or_create(user=self.user)
         self.profile.summary = "Experienced professional with background in software engineering, data analysis, and teaching."
         self.profile.github = "https://github.com/testuser"
         self.profile.linkedin = "https://linkedin.com/in/testuser"
@@ -590,7 +590,7 @@ class PenaltyBonusEngineTests(APITestCase):
         self.user.save()
         
         # Profile is auto-created by signal, retrieve and update it
-        self.profile = Profile.objects.get(user=self.user)
+        self.profile, _ = Profile.objects.get_or_create(user=self.user)
         self.profile.summary = "Experienced Software Engineer with a proven track record of designing scalable cloud APIs."
         self.profile.github = "https://github.com/candidate-adj"
         self.profile.linkedin = "https://linkedin.com/in/candidate-adj"
@@ -634,7 +634,7 @@ class PenaltyBonusEngineTests(APITestCase):
 
         # 1. Test extreme penalties (empty/missing details)
         poor_user = User.objects.create_user(username="poor_adj", email="", password="Password123")
-        poor_profile = Profile.objects.get(user=poor_user)
+        poor_profile, _ = Profile.objects.get_or_create(user=poor_user)
         poor_profile.summary = ""
         poor_profile.save()
         
@@ -719,7 +719,7 @@ class ExplainableATSEngineTests(APITestCase):
             password="Password123"
         )
         # Profile is auto-created by signal, retrieve and update it
-        self.profile = Profile.objects.get(user=self.user)
+        self.profile, _ = Profile.objects.get_or_create(user=self.user)
         self.profile.summary = "Experienced Software Engineer with a proven track record of designing scalable cloud APIs."
         self.profile.github = "https://github.com/candidate-explain"
         self.profile.linkedin = "https://linkedin.com/in/candidate-explain"

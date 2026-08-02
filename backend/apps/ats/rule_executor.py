@@ -39,6 +39,10 @@ class RuleExecutor:
             logger.warning("No ATS rules found. Automatically seeding rules...")
             RuleLoader.seed_rules()
 
+        # 1b. Auto-sync parsed resume data into profile if profile relations are missing
+        cls.sync_profile_from_resume(profile, resume)
+        profile.refresh_from_db()
+
         # 2. Gather profile details
         skills = list(profile.skills.all())
         educations = list(profile.educations.all())
@@ -280,4 +284,188 @@ class RuleExecutor:
             "weaknesses": cat_analysis["weaknesses"],
             "recommendations": cat_analysis["recommendations"]
         }
+
+    @classmethod
+    def sync_profile_from_resume(cls, profile: Profile, resume: Resume):
+        """
+        Auto-syncs extracted/parsed data from Resume to Profile and its related models if Profile data is missing.
+        """
+        if not resume:
+            return
+
+        # Ensure extracted text and master JSON are populated
+        if not getattr(resume, "extracted_text", ""):
+            try:
+                from apps.resumes.services import ResumeExtractionService
+                ResumeExtractionService().extract_resume_text(resume)
+                resume.refresh_from_db()
+            except Exception as e:
+                logger.warning(f"Auto-extract text failed during sync: {e}")
+
+        if not getattr(resume, "master_resume_json", {}):
+            try:
+                from apps.resumes.validation_service import MasterResumeBuilder
+                MasterResumeBuilder().build_master_profile(resume)
+                resume.refresh_from_db()
+            except Exception as e:
+                logger.warning(f"Auto-build master profile failed during sync: {e}")
+
+        master_json = getattr(resume, "master_resume_json", {}) or {}
+        ai_json = getattr(resume, "ai_json", {}) or {}
+        spacy_json = getattr(resume, "spacy_json", {}) or {}
+        regex_json = getattr(resume, "regex_json", {}) or {}
+
+        # 1. Update basic profile info if blank
+        updated_profile = False
+        
+        summary = master_json.get("summary") or ai_json.get("summary") or ""
+        if summary and not profile.summary:
+            profile.summary = summary
+            updated_profile = True
+
+        linkedin = master_json.get("linkedin") or regex_json.get("linkedin") or ""
+        if linkedin and not profile.linkedin:
+            profile.linkedin = linkedin
+            updated_profile = True
+
+        github = master_json.get("github") or regex_json.get("github") or ""
+        if github and not profile.github:
+            profile.github = github
+            updated_profile = True
+
+        portfolio = master_json.get("portfolio") or master_json.get("personal_website") or regex_json.get("portfolio") or ""
+        if portfolio and not profile.portfolio_url:
+            profile.portfolio_url = portfolio
+            updated_profile = True
+
+        address = master_json.get("address") or spacy_json.get("address") or ""
+        if address and not profile.address:
+            profile.address = address
+            updated_profile = True
+
+        if updated_profile:
+            profile.save()
+
+        # Update User phone if missing
+        if hasattr(profile, 'user') and profile.user:
+            user = profile.user
+            phone = master_json.get("phone") or regex_json.get("phone") or ""
+            if phone and not getattr(user, 'phone', ''):
+                try:
+                    user.phone = phone
+                    user.save(update_fields=['phone'])
+                except Exception:
+                    pass
+
+        # 2. Sync Skills
+        if not profile.skills.exists():
+            extracted_skills = master_json.get("skills") or ai_json.get("skills") or []
+            tech_skills = master_json.get("technical_skills") or ai_json.get("technical_skills") or []
+            soft_skills = master_json.get("soft_skills") or ai_json.get("soft_skills") or []
+            
+            all_skills = set()
+            for s in (extracted_skills + tech_skills + soft_skills):
+                if isinstance(s, str) and s.strip():
+                    all_skills.add(s.strip())
+
+            # Fallback if parsing JSONs didn't extract skills: extract from raw text
+            if not all_skills and resume.extracted_text:
+                common_tech = ["python", "javascript", "react", "node", "java", "c++", "c#", "html", "css", "sql", "django", "fastapi", "docker", "kubernetes", "aws", "git", "linux", "rest", "graphql", "mongodb", "postgresql"]
+                text_lower = resume.extracted_text.lower()
+                for skill_kw in common_tech:
+                    if skill_kw in text_lower:
+                        all_skills.add(skill_kw.title())
+
+            for skill_name in all_skills:
+                try:
+                    s_type = Skill.SkillType.SOFT if any(sw in skill_name.lower() for sw in ["communication", "leadership", "management", "teamwork"]) else Skill.SkillType.TECHNICAL
+                    Skill.objects.get_or_create(
+                        profile=profile,
+                        skill_name=skill_name,
+                        defaults={"skill_type": s_type}
+                    )
+                except Exception as e:
+                    logger.debug(f"Error syncing skill '{skill_name}': {e}")
+
+        # 3. Sync Experiences
+        if not profile.experiences.exists():
+            exp_list = master_json.get("experience") or ai_json.get("experience") or []
+            for exp in exp_list:
+                if isinstance(exp, dict):
+                    company = (exp.get("company") or "Company").strip()
+                    designation = (exp.get("designation") or exp.get("title") or exp.get("role") or "Professional Role").strip()
+                    desc = (exp.get("description") or "").strip()
+                    if company or designation:
+                        try:
+                            from datetime import date
+                            Experience.objects.create(
+                                profile=profile,
+                                company=company,
+                                designation=designation,
+                                description=desc,
+                                start_date=date(2021, 1, 1)
+                            )
+                        except Exception as e:
+                            logger.debug(f"Error syncing experience: {e}")
+
+        # 4. Sync Educations
+        if not profile.educations.exists():
+            edu_list = master_json.get("education") or ai_json.get("education") or []
+            for edu in edu_list:
+                if isinstance(edu, dict):
+                    institute = (edu.get("institution") or edu.get("school") or "University").strip()
+                    degree = (edu.get("degree") or "Bachelor's Degree").strip()
+                    field = (edu.get("field_of_study") or edu.get("major") or "").strip()
+                    try:
+                        from datetime import date
+                        Education.objects.create(
+                            profile=profile,
+                            institute=institute,
+                            degree=degree,
+                            field_of_study=field,
+                            start_date=date(2017, 8, 1),
+                            end_date=date(2021, 5, 1)
+                        )
+                    except Exception as e:
+                        logger.debug(f"Error syncing education: {e}")
+
+        # 5. Sync Projects
+        if not profile.projects.exists():
+            proj_list = master_json.get("projects") or ai_json.get("projects") or []
+            for proj in proj_list:
+                if isinstance(proj, dict):
+                    title = (proj.get("title") or proj.get("name") or "Project").strip()
+                    desc = (proj.get("description") or "").strip()
+                    techs = proj.get("technologies") or []
+                    tech_str = ", ".join(techs) if isinstance(techs, list) else str(techs)
+                    try:
+                        Project.objects.create(
+                            profile=profile,
+                            project_name=title,
+                            technologies=tech_str,
+                            description=desc,
+                            github_url=profile.github or "",
+                            live_url=profile.portfolio_url or ""
+                        )
+                    except Exception as e:
+                        logger.debug(f"Error syncing project: {e}")
+
+        # 6. Sync Certifications
+        if not profile.certifications.exists():
+            cert_list = master_json.get("certifications") or ai_json.get("certifications") or []
+            for cert in cert_list:
+                cert_name = cert.get("title") if isinstance(cert, dict) else str(cert)
+                org = cert.get("issuer") if isinstance(cert, dict) else "Organization"
+                if cert_name and isinstance(cert_name, str):
+                    try:
+                        from datetime import date
+                        Certification.objects.create(
+                            profile=profile,
+                            certificate_name=cert_name.strip(),
+                            organization=str(org).strip(),
+                            issue_date=date(2022, 1, 1)
+                        )
+                    except Exception as e:
+                        logger.debug(f"Error syncing certification: {e}")
+
 

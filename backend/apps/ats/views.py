@@ -128,6 +128,8 @@ class ATSAnalyzeView(APIView):
                     report=report
                 )
 
+                missing_skills_list = exec_data.get("profession_profile", {}).get("missing_required_skills", []) + exec_data.get("profession_profile", {}).get("missing_recommended_skills", [])
+                
                 # 5. Store in legacy ATSScore model for backward compatibility
                 # Convert the new report payload structure to the legacy ats_json keys
                 legacy_json = {
@@ -140,7 +142,7 @@ class ATSAnalyzeView(APIView):
                     "formatting_score": report_payload["subscores"].get("formatting", 70.0),
                     "completion_score": report_payload["subscores"].get("contact", 80.0),
                     "industry_score": report_payload["subscores"].get("skills", 70.0),
-                    "missing_skills": [],
+                    "missing_skills": missing_skills_list,
                     "suggestions": report_payload["recommendations"],
                     "strengths": report_payload["strengths"],
                     "weaknesses": report_payload["weaknesses"],
@@ -157,7 +159,7 @@ class ATSAnalyzeView(APIView):
                     ats_json=legacy_json,
                     ats_processing_time=report_payload["metadata"]["processing_time"],
                     industry_match={report_payload["metadata"]["profession"]: 100.0},
-                    missing_skills=[],
+                    missing_skills=missing_skills_list,
                     suggestions=report_payload["recommendations"]
                 )
 
@@ -197,7 +199,7 @@ class ATSAnalyzeView(APIView):
                 "benchmark_comparison": benchmark_data,
                 "ats_json": legacy_json,
                 "industry_match": {profession: 100.0},
-                "missing_skills": [],
+                "missing_skills": missing_skills_list,
                 "suggestions": report_payload["recommendations"],
                 "ats_completed_at": report.created_at.isoformat(),
                 "ats_processing_time": report_payload["metadata"]["processing_time"]
@@ -283,6 +285,8 @@ class ATSDetailView(APIView):
         from .benchmark_engine import BenchmarkEngine
         benchmark_data = BenchmarkEngine.get_benchmark_comparison(profession, latest_report.overall_score)
 
+        missing_skills_list = latest_report.metadata.get("missing_required_skills", []) + latest_report.metadata.get("missing_recommended_skills", []) if isinstance(latest_report.metadata, dict) else []
+
         data = {
             "id": str(latest_report.id),
             "resume": str(resume.id),
@@ -306,13 +310,13 @@ class ATSDetailView(APIView):
                 "subscores": latest_report.subscores,
                 "metadata": latest_report.metadata,
                 "suggestions": latest_report.recommendations,
-                "missing_skills": []
+                "missing_skills": missing_skills_list
             },
             "industry_match": {profession: 100.0},
-            "missing_skills": [],
+            "missing_skills": missing_skills_list,
             "suggestions": latest_report.recommendations,
             "ats_completed_at": latest_report.created_at.isoformat(),
-            "ats_processing_time": latest_report.metadata.get("processing_time", 0.05)
+            "ats_processing_time": latest_report.metadata.get("processing_time", 0.05) if isinstance(latest_report.metadata, dict) else 0.05
         }
         return Response(data)
 
@@ -340,7 +344,7 @@ class ATSReportDetailView(APIView):
 
     def get(self, request, id):
         report = get_object_or_404(ATSReport, id=id, resume__user=request.user)
-        profession = report.metadata.get("profession", "Software Engineer")
+        profession = report.metadata.get("profession", "Software Engineer") if isinstance(report.metadata, dict) else "Software Engineer"
         
         # Calculate/get benchmark comparison
         benchmark, _ = ATSBenchmark.objects.get_or_create(
@@ -385,6 +389,8 @@ class ATSReportDetailView(APIView):
         data = serializer.data
         data["benchmark_comparison"] = benchmark_data
         
+        rep_missing_skills = report.metadata.get("missing_required_skills", []) + report.metadata.get("missing_recommended_skills", []) if isinstance(report.metadata, dict) else []
+
         # Backward compatibility dashboard properties
         data["ats_score"] = score
         data["ats_json"] = {
@@ -395,7 +401,7 @@ class ATSReportDetailView(APIView):
             "subscores": report.subscores,
             "metadata": report.metadata,
             "suggestions": report.recommendations,
-            "missing_skills": []
+            "missing_skills": rep_missing_skills
         }
         
         return Response(data)
