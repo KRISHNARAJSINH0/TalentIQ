@@ -52,7 +52,7 @@ const AdminDashboard = () => {
     <div>
       <div className="admin-header">
         <h1 className="admin-title">Overview</h1>
-        <p className="admin-subtitle">Real-time statistics and summary logs across ResumeAI platforms.</p>
+        <p className="admin-subtitle">Real-time statistics and summary logs across TalentIQ platforms.</p>
       </div>
 
       {/* KPI Cards Grid */}

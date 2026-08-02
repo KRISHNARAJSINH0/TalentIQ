@@ -16,6 +16,7 @@ from django.core.validators import (
 )
 from django.db import models
 
+# pyrefly: ignore [missing-import]
 from apps.common.models import BaseModel
 
 

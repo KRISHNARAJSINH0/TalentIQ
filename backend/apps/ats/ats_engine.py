@@ -4,11 +4,16 @@ import time
 from datetime import datetime
 from django.utils import timezone
 
+# pyrefly: ignore [missing-import]
 from apps.profiles.models import Profile, Skill, Education, Experience, Project, Certification
+# pyrefly: ignore [missing-import]
 from apps.resumes.models import Resume, ConsistencyReport
-from apps.resumes.services.consistency_checker import ConsistencyChecker
+# pyrefly: ignore [missing-import]
+from apps.resumes.services.consistency_checker import ConsistencyChecker 
+# pyrefly: ignore [missing-import]
 from apps.reputation.models import ResumeReputation
 
+# pyrefly: ignore [missing-import]
 from .profession_engine import ProfessionEngine
 from .weight_engine import WeightEngine
 from .keyword_engine import KeywordEngine

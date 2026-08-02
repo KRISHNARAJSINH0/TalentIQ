@@ -66,7 +66,7 @@ const Login = () => {
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
         <h1 className="auth-card-title">Welcome Back</h1>
-        <p className="auth-card-subtitle">Sign in to your ResumeAI account</p>
+        <p className="auth-card-subtitle">Sign in to your TalentIQ account</p>
 
         {errors.general && (
           <div className="auth-error">{errors.general}</div>

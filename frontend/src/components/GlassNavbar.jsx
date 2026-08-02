@@ -62,7 +62,7 @@ const GlassNavbar = ({ setIsMobileOpen }) => {
 
         {/* Brand name on mobile (since sidebar is hidden) */}
         <Link to="/dashboard" className="hide-on-desktop" style={{ fontSize: '1.15rem', fontWeight: 800, textDecoration: 'none', background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          ResumeAI
+          TalentIQ
         </Link>
       </div>
 

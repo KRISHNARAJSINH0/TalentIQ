@@ -8,6 +8,7 @@ import time
 from datetime import datetime
 from django.utils import timezone
 
+# pyrefly: ignore [missing-import]
 from apps.profiles.models import Profile, Skill, Education, Experience, Project, Certification, Language
 
 

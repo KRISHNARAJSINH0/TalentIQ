@@ -3,8 +3,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { HiOutlineSparkles } from 'react-icons/hi2';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { HiOutlineLightBulb } from 'react-icons/hi2';
 import { RiCloseLine } from 'react-icons/ri';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
@@ -16,6 +16,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -30,6 +31,21 @@ const Navbar = () => {
     navigate('/login');
   };
 
+  // Smooth scroll to a section; if not on home page, navigate first then scroll
+  const scrollToSection = (sectionId) => {
+    closeMobile();
+    const doScroll = () => {
+      const el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(doScroll, 400);
+    } else {
+      doScroll();
+    }
+  };
+
   return (
     <>
       <motion.nav
@@ -40,8 +56,8 @@ const Navbar = () => {
       >
         <div className="navbar-inner">
           <Link to="/" className="navbar-brand">
-            <div className="navbar-brand-icon"><HiOutlineSparkles /></div>
-            ResumeAI
+            <div className="navbar-brand-icon"><HiOutlineLightBulb /></div>
+            TalentIQ
           </Link>
 
           <ul className="navbar-links">
@@ -57,8 +73,8 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <li><a href="/#features" className="navbar-link">Features</a></li>
-                <li><a href="/#about" className="navbar-link">About</a></li>
+                <li><button className="navbar-link" onClick={() => scrollToSection('features')}>Features</button></li>
+                <li><button className="navbar-link" onClick={() => scrollToSection('testimonials')}>About</button></li>
               </>
             )}
           </ul>
@@ -116,9 +132,10 @@ const Navbar = () => {
           </>
         ) : (
           <>
-            <a href="/#features" className="navbar-mobile-link" onClick={closeMobile}>Features</a>
+            <button className="navbar-mobile-link" onClick={() => scrollToSection('features')}>Features</button>
+            <button className="navbar-mobile-link" onClick={() => scrollToSection('testimonials')}>About</button>
             <Link to="/login" className="navbar-mobile-link" onClick={closeMobile}>Login</Link>
-            <Link to="/register" className="navbar-mobile-link" onClick={closeMobile}>Get Started</Link>
+            <Link to="/register" className="navbar-mobile-link navbar-mobile-cta" onClick={closeMobile}>Get Started</Link>
           </>
         )}
       </div>

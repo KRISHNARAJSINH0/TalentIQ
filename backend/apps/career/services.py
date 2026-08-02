@@ -7,6 +7,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 # pyrefly: ignore [missing-import]
 import google.generativeai as genai
+# pyrefly: ignore [missing-import]
 from google.generativeai.types import GenerationConfig
 
 logger = logging.getLogger(__name__)

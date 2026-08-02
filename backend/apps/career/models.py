@@ -1,6 +1,9 @@
 from django.conf import settings
 from django.db import models
+
+# pyrefly: ignore [missing-import]
 from apps.common.models import BaseModel
+# pyrefly: ignore [missing-import]
 from apps.profiles.models import Profile
 
 

@@ -587,46 +587,46 @@ const ATSDashboard = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }} className="adjustments-breakdown-grid">
                   
                   {/* Penalties List */}
-                  <div style={{ background: 'rgba(0,0,0,0.1)', padding: '16px', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                    <h4 style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#EF4444', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <div style={{ background: 'var(--glass-bg)', padding: '18px', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', marginTop: 0 }}>
                       <HiOutlineExclamationCircle /> Active Penalties ({metadata.adjustments.penalty_report?.length || 0})
                     </h4>
                     {metadata.adjustments.penalty_report && metadata.adjustments.penalty_report.length > 0 ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto', paddingRight: '4px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '260px', overflowY: 'auto', padding: '4px 6px 4px 2px' }}>
                         {metadata.adjustments.penalty_report.map((p, idx) => (
-                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(239, 68, 68, 0.03)', padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(239, 68, 68, 0.1)', fontSize: '0.8125rem' }}>
-                            <div>
-                              <strong style={{ color: 'var(--white)' }}>{p.name}</strong>
-                              <span style={{ fontSize: '0.6875rem', color: 'var(--gray-500)', marginLeft: '8px' }}>({p.category})</span>
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(239, 68, 68, 0.08)', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)', fontSize: '0.85rem', lineHeight: '1.4' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                              <strong style={{ color: 'var(--text-color)' }}>{p.name}</strong>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--subtext-color)', background: 'var(--glass-bg)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--glass-border)' }}>({p.category})</span>
                             </div>
-                            <span style={{ color: '#EF4444', fontWeight: 'bold' }}>{p.points}</span>
+                            <span style={{ color: 'var(--danger)', fontWeight: '800', fontSize: '0.9rem', background: 'rgba(239,68,68,0.15)', padding: '3px 8px', borderRadius: '6px', whiteSpace: 'nowrap' }}>{p.points}</span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p style={{ fontSize: '0.8125rem', color: 'var(--gray-500)' }}>Clean profile! No penalties applied.</p>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--subtext-color)', margin: 0 }}>Clean profile! No penalties applied.</p>
                     )}
                   </div>
 
                   {/* Bonuses List */}
-                  <div style={{ background: 'rgba(0,0,0,0.1)', padding: '16px', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                    <h4 style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#10B981', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <div style={{ background: 'var(--glass-bg)', padding: '18px', borderRadius: '12px', border: '1px solid var(--glass-border)' }}>
+                    <h4 style={{ fontSize: '0.9rem', fontWeight: 'bold', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px', marginTop: 0 }}>
                       <HiOutlineCheckCircle /> Active Bonuses ({metadata.adjustments.bonus_report?.length || 0})
                     </h4>
                     {metadata.adjustments.bonus_report && metadata.adjustments.bonus_report.length > 0 ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto', paddingRight: '4px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '260px', overflowY: 'auto', padding: '4px 6px 4px 2px' }}>
                         {metadata.adjustments.bonus_report.map((b, idx) => (
-                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(16, 185, 129, 0.03)', padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(16, 185, 129, 0.1)', fontSize: '0.8125rem' }}>
-                            <div>
-                              <strong style={{ color: 'var(--white)' }}>{b.name}</strong>
-                              <span style={{ fontSize: '0.6875rem', color: 'var(--gray-500)', marginLeft: '8px' }}>({b.category})</span>
+                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(16, 185, 129, 0.08)', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)', fontSize: '0.85rem', lineHeight: '1.4' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                              <strong style={{ color: 'var(--text-color)' }}>{b.name}</strong>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--subtext-color)', background: 'var(--glass-bg)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--glass-border)' }}>({b.category})</span>
                             </div>
-                            <span style={{ color: '#10B981', fontWeight: 'bold' }}>+{b.points}</span>
+                            <span style={{ color: 'var(--success)', fontWeight: '800', fontSize: '0.9rem', background: 'rgba(16,185,129,0.15)', padding: '3px 8px', borderRadius: '6px', whiteSpace: 'nowrap' }}>+{b.points}</span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p style={{ fontSize: '0.8125rem', color: 'var(--gray-500)' }}>No bonuses applied. Enhance your profile to get score boosts.</p>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--subtext-color)', margin: 0 }}>No bonuses applied. Enhance your profile to get score boosts.</p>
                     )}
                   </div>
 
@@ -950,23 +950,23 @@ const ATSDashboard = () => {
             <div className="ats-card" style={{ padding: '20px', marginBottom: '24px' }}>
               <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                 <div style={{ flex: 1, minWidth: '250px' }}>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--gray-400)', marginBottom: '8px' }}>Search Rules</label>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--subtext-color)', marginBottom: '8px', fontWeight: 600 }}>Search Rules</label>
                   <input
                     type="text"
                     className="form-control"
                     placeholder="Search by code or name..."
                     value={rulesSearchQuery}
                     onChange={(e) => setRulesSearchQuery(e.target.value)}
-                    style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'var(--glass-border)', color: 'var(--white)', borderRadius: '8px', padding: '10px' }}
+                    style={{ background: 'var(--glass-bg)', borderColor: 'var(--glass-border)', color: 'var(--text-color)', borderRadius: '8px', padding: '10px 14px' }}
                   />
                 </div>
                 <div style={{ width: '200px' }}>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--gray-400)', marginBottom: '8px' }}>Category</label>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--subtext-color)', marginBottom: '8px', fontWeight: 600 }}>Category</label>
                   <select
                     className="form-control"
                     value={rulesCategoryFilter}
                     onChange={(e) => setRulesCategoryFilter(e.target.value)}
-                    style={{ background: 'rgba(20,20,25,0.95)', borderColor: 'var(--glass-border)', color: 'var(--white)', borderRadius: '8px', padding: '10px' }}
+                    style={{ background: 'var(--bg-primary)', borderColor: 'var(--glass-border)', color: 'var(--text-color)', borderRadius: '8px', padding: '10px 14px' }}
                   >
                     <option value="All">All Categories</option>
                     {['Contact', 'Summary', 'Skills', 'Experience', 'Projects', 'Education', 'Certifications', 'Achievements', 'Formatting', 'Grammar', 'Portfolio', 'GitHub', 'LinkedIn', 'ATS Parsing', 'Consistency', 'Keyword Quality', 'Career Progression', 'Leadership', 'Soft Skills', 'Job Match'].map(cat => (
@@ -975,12 +975,12 @@ const ATSDashboard = () => {
                   </select>
                 </div>
                 <div style={{ width: '200px' }}>
-                  <label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--gray-400)', marginBottom: '8px' }}>Profession</label>
+                  <label style={{ display: 'block', fontSize: '0.8125rem', color: 'var(--subtext-color)', marginBottom: '8px', fontWeight: 600 }}>Profession</label>
                   <select
                     className="form-control"
                     value={rulesProfessionFilter}
                     onChange={(e) => setRulesProfessionFilter(e.target.value)}
-                    style={{ background: 'rgba(20,20,25,0.95)', borderColor: 'var(--glass-border)', color: 'var(--white)', borderRadius: '8px', padding: '10px' }}
+                    style={{ background: 'var(--bg-primary)', borderColor: 'var(--glass-border)', color: 'var(--text-color)', borderRadius: '8px', padding: '10px 14px' }}
                   >
                     <option value="All">All Professions</option>
                     {['All', 'Software Engineering', 'Full Stack', 'Backend', 'Frontend', 'AI/ML', 'Data Science', 'Mechanical', 'Civil', 'Electrical', 'Chemical', 'HR', 'Marketing', 'Finance', 'Accounting', 'Doctor', 'Teacher', 'Lawyer', 'Freelancer', 'Student', 'Designer', 'Journalist', 'Researcher'].map(prof => (
@@ -1029,15 +1029,15 @@ const ATSDashboard = () => {
                             <span className="indicator-badge" style={{ background: 'rgba(139,92,246,0.1)', borderColor: '#8B5CF6', color: '#8B5CF6' }}>
                               {rule.profession}
                             </span>
-                            <span className="indicator-badge" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'var(--glass-border)', color: 'var(--gray-300)' }}>
+                            <span className="indicator-badge" style={{ background: 'var(--glass-bg)', borderColor: 'var(--glass-border)', color: 'var(--subtext-color)' }}>
                               {rule.category_name}
                             </span>
                           </div>
-                          <h4 style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--white)', marginBottom: '8px' }}>{rule.name}</h4>
-                          <p style={{ fontSize: '0.8125rem', color: 'var(--gray-400)', marginBottom: '12px' }}>{rule.description}</p>
+                          <h4 style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-color)', marginBottom: '8px' }}>{rule.name}</h4>
+                          <p style={{ fontSize: '0.8125rem', color: 'var(--subtext-color)', marginBottom: '12px' }}>{rule.description}</p>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>Condition:</span>
-                            <code style={{ fontSize: '0.75rem', color: '#6EE7B7', background: 'rgba(0,0,0,0.2)', padding: '2px 6px', borderRadius: '4px', fontFamily: 'monospace' }}>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--subtext-color)' }}>Condition:</span>
+                            <code style={{ fontSize: '0.75rem', color: 'var(--primary)', background: 'var(--glass-bg)', padding: '2px 6px', borderRadius: '4px', fontFamily: 'monospace', border: '1px solid var(--glass-border)' }}>
                               {rule.condition}
                             </code>
                           </div>

@@ -81,6 +81,11 @@
   transition: all var(--transition-fast);
   cursor: pointer;
   text-decoration: none;
+  /* Reset button defaults */
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  line-height: inherit;
 }
 
 .navbar-link:hover {
@@ -200,10 +205,34 @@ html.dark .navbar-link:hover {
   color: var(--subtext-color);
   transition: color var(--transition-fast);
   text-decoration: none;
+  /* Reset button defaults */
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  padding: 4px 0;
+  text-align: center;
 }
 
 .navbar-mobile-link:hover {
   color: var(--text-color);
+}
+
+.navbar-mobile-cta {
+  display: inline-flex;
+  padding: 14px 36px;
+  background: var(--gradient-primary);
+  color: #fff !important;
+  border-radius: 14px;
+  font-size: 1.1rem !important;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+  margin-top: 8px;
+}
+
+.navbar-mobile-cta:hover {
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.5);
 }
 
 /* Responsive */

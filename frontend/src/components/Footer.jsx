@@ -4,7 +4,7 @@
  */
 
 import { Link } from 'react-router-dom';
-import { HiOutlineSparkles } from 'react-icons/hi2';
+import { HiOutlineLightBulb } from 'react-icons/hi2';
 import { RiGithubFill, RiTwitterXFill, RiLinkedinFill } from 'react-icons/ri';
 import '../styles/Footer.css';
 
@@ -19,9 +19,9 @@ const Footer = () => {
           <div className="footer-brand">
             <div className="footer-logo">
               <div className="footer-logo-icon">
-                <HiOutlineSparkles />
+                <HiOutlineLightBulb />
               </div>
-              ResumeAI
+              TalentIQ
             </div>
             <p className="footer-description">
               AI-powered resume parsing, portfolio generation, and ATS
@@ -77,7 +77,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="footer-bottom">
           <div className="footer-bottom-inner">
-            <span>&copy; {currentYear} ResumeAI. All rights reserved.</span>
+            <span>&copy; {currentYear} TalentIQ. All rights reserved.</span>
             <div className="footer-bottom-links">
               <a href="#" className="footer-bottom-link">Privacy Policy</a>
               <a href="#" className="footer-bottom-link">Terms of Service</a>

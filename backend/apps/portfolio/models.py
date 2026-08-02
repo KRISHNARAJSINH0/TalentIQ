@@ -8,7 +8,10 @@ a public-facing portfolio page with a unique slug.
 from django.db import models
 from django.utils.text import slugify
 
+# pyrefly: ignore [missing-import]
 from apps.common.models import BaseModel
+
+# pyrefly: ignore [missing-import]
 from apps.profiles.models import Profile
 
 

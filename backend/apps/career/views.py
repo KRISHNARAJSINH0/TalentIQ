@@ -1,13 +1,19 @@
+from .services import logger
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
+# pyrefly: ignore [missing-import]
 from apps.profiles.models import Profile
+# pyrefly: ignore [missing-import]
 from apps.profiles.serializers import ProfileMasterSerializer
+# pyrefly: ignore [missing-import]
 from .models import CareerProfile, CoverLetter, LearningProgressLog
+# pyrefly: ignore [missing-import]
 from .serializers import CareerProfileSerializer, CoverLetterSerializer, LearningProgressLogSerializer
+# pyrefly: ignore [missing-import]
 from .services import CareerAnalysisService, CoverLetterGeneratorService
 
 
@@ -19,7 +25,9 @@ class CareerAnalysisView(APIView):
             profile = Profile.objects.get(user=request.user)
             # Auto-initialize and auto-verify from latest completed resume if not verified/empty
             if not profile.is_verified or not profile.summary:
+                # pyrefly: ignore [missing-import]
                 from apps.resumes.models import Resume
+                # pyrefly: ignore [missing-import]
                 from apps.profiles.views import initialize_profile_from_resume
                 latest_resume = Resume.objects.filter(user=request.user, validation_status="completed").order_by("-updated_at").first()
                 if latest_resume:
@@ -28,10 +36,12 @@ class CareerAnalysisView(APIView):
                     profile.is_verified = True
                     profile.save()
         except Profile.DoesNotExist:
+            # pyrefly: ignore [missing-import]
             from apps.resumes.models import Resume
             latest_resume = Resume.objects.filter(user=request.user, validation_status="completed").order_by("-updated_at").first()
             if latest_resume:
                 profile = Profile.objects.create(user=request.user)
+                # pyrefly: ignore [missing-import]
                 from apps.profiles.views import initialize_profile_from_resume
                 initialize_profile_from_resume(profile, latest_resume)
                 profile.is_verified = True
@@ -54,6 +64,7 @@ class CareerAnalysisView(APIView):
         # Get ATS results if any (from the user's latest ATSScore record)
         ats_results = {}
         try:
+            # pyrefly: ignore [missing-import]
             from apps.ats.models import ATSScore
             latest_ats = ATSScore.objects.filter(resume__user=request.user).order_by("-created_at").first()
             if latest_ats:
@@ -199,7 +210,9 @@ class CoverLetterGenerateView(APIView):
             profile = Profile.objects.get(user=request.user)
             # Auto-initialize and auto-verify from latest completed resume if not verified/empty
             if not profile.is_verified or not profile.summary:
+                # pyrefly: ignore [missing-import]
                 from apps.resumes.models import Resume
+                # pyrefly: ignore [missing-import]
                 from apps.profiles.views import initialize_profile_from_resume
                 latest_resume = Resume.objects.filter(user=request.user, validation_status="completed").order_by("-updated_at").first()
                 if latest_resume:
@@ -208,10 +221,12 @@ class CoverLetterGenerateView(APIView):
                     profile.is_verified = True
                     profile.save()
         except Profile.DoesNotExist:
+            # pyrefly: ignore [missing-import]
             from apps.resumes.models import Resume
             latest_resume = Resume.objects.filter(user=request.user, validation_status="completed").order_by("-updated_at").first()
             if latest_resume:
                 profile = Profile.objects.create(user=request.user)
+                # pyrefly: ignore [missing-import]
                 from apps.profiles.views import initialize_profile_from_resume
                 initialize_profile_from_resume(profile, latest_resume)
                 profile.is_verified = True

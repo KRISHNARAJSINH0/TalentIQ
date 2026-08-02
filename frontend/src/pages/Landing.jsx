@@ -1,6 +1,7 @@
 /**
  * Landing Page
- * Assembles the hero and features sections.
+ * Assembles: Hero → How It Works → Features → Testimonials → CTA
+ * Note: Footer is rendered by MainLayout for all unauthenticated pages.
  */
 
 import HeroSection from '../components/HeroSection';

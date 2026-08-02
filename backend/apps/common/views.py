@@ -1,6 +1,8 @@
 """Common views – Shared utility endpoints."""
 
+# pyrefly: ignore [missing-import]
 from rest_framework.decorators import api_view
+# pyrefly: ignore [missing-import]
 from rest_framework.response import Response
 
 

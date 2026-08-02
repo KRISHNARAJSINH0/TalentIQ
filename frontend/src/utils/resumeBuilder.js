@@ -1,37 +1,38 @@
 import axiosInstance from '../api/axiosInstance';
 
+const RESUME_BUILDER_TARGET_URL = 'https://resume-builder-from-talent-iq.vercel.app';
+
 /**
- * Exports the verified profile JSON and opens the Resume Builder (internal or external).
- * Saves profile data to localStorage under 'master_resume_json' and opens a new tab or redirects.
+ * Exports the verified profile JSON and opens the Resume Builder external Vercel app.
+ * Target URL: https://resume-builder-from-talent-iq.vercel.app
  * 
- * @param {Function} navigate - React Router navigate hook function
- * @param {Function} setLoading - State setter for loading spinner
+ * @param {Function} navigate - React Router navigate hook function (optional)
+ * @param {Function} setLoading - State setter for loading spinner (optional)
  */
 export const handleOpenResumeBuilder = async (navigate, setLoading) => {
   if (setLoading) setLoading(true);
+
+  // Determine external URL (defaulting to the specified vercel app)
+  const envUrl = import.meta.env.VITE_RESUME_BUILDER_URL;
+  const baseUrl = envUrl || RESUME_BUILDER_TARGET_URL;
+  const formattedUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`;
+
   try {
-    // 1. Fetch verified profile JSON
+    // 1. Fetch verified profile JSON from backend API
     const response = await axiosInstance.get('/profile/export/');
     const profileJson = response.data;
 
-    // 2. Save master_resume_json to localStorage so the builder can access it
-    localStorage.setItem('master_resume_json', JSON.stringify(profileJson));
-
-    // 3. Check if builder exists inside React
-    // If the path '/resume-builder' is configured or hasInternalBuilder is toggled, navigate internally
-    const hasInternalBuilder = false; // Set to true if an internal builder is developed/active
-
-    if (hasInternalBuilder) {
-      navigate('/resume-builder', { state: { master_resume_json: profileJson } });
-    } else {
-      // 4. Open external builder in a new tab
-      const externalUrl = import.meta.env.VITE_RESUME_BUILDER_URL || 'https://rxresume.me';
-      const serializedData = encodeURIComponent(JSON.stringify(profileJson));
-      window.open(`${externalUrl}?data=${serializedData}`, '_blank');
+    // 2. Save master_resume_json to localStorage
+    if (profileJson) {
+      localStorage.setItem('master_resume_json', JSON.stringify(profileJson));
     }
+
+    // 3. Open target URL in a new tab
+    window.open(formattedUrl, '_blank', 'noopener,noreferrer');
   } catch (error) {
-    console.error('Error opening resume builder:', error);
-    alert('Failed to open Resume Builder: Please verify that you have initialized your master profile.');
+    console.warn('Error fetching profile export, opening Resume Builder directly:', error);
+    // Fallback: Open builder directly even if API export hits a warning
+    window.open(formattedUrl, '_blank', 'noopener,noreferrer');
   } finally {
     if (setLoading) setLoading(false);
   }

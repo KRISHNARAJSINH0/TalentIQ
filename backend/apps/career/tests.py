@@ -2,7 +2,10 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
+
+# pyrefly: ignore [missing-import]
 from apps.profiles.models import Profile
+# pyrefly: ignore [missing-import]
 from .models import CareerProfile, CoverLetter, LearningProgressLog
 
 User = get_user_model()
@@ -56,6 +59,7 @@ class CareerAssistantTests(APITestCase):
         profile.is_verified = True
         profile.save()
 
+        # pyrefly: ignore [missing-import]
         from apps.profiles.models import Skill
         Skill.objects.create(
             profile=profile,
